@@ -3,5 +3,5 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
-  base: '/Ground-Brew-Cafe/',
+  base: process.env.GITHUB_PAGES === 'true' ? '/Ground-Brew-Cafe/' : '/',
 })

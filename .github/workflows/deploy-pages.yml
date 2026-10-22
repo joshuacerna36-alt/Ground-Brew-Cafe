@@ -30,6 +30,8 @@ jobs:
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
       - name: Build site
+        env:
+          GITHUB_PAGES: 'true'
         run: npm run build
       - name: Upload GitHub Pages artifact
         uses: actions/upload-pages-artifact@v3
