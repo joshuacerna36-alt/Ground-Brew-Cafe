@@ -3,6 +3,7 @@ import styles from './HeroSection.module.css'
 import StaffDashboard from './StaffDashboard'
 
 const php = (value) => `₱${value.toFixed(2)}`
+const asset = (path) => `${import.meta.env.BASE_URL}${path.replace(/^\/+/, '')}`
 
 // Legacy USD prices use the 2026-10-22 rate of PHP 63.509 per USD.
 const menuData = {
@@ -57,7 +58,7 @@ const menuData = {
 }
 
 const categories = Object.keys(menuData)
-const logo = '/grounded-brew-logo.png'
+const logo = asset('/grounded-brew-logo.png')
 const manilaTimeZone = 'Asia/Manila'
 
 const getManilaParts = (date) => Object.fromEntries(
@@ -379,7 +380,7 @@ const HeroSection = () => {
                   aria-label={`${item.soldOut ? 'Sold out: ' : 'Select '}${item.name}, ${item.priceDisplay}`}
                 >
                   <div className={styles.menuItemImage}>
-                    <img src={item.image} alt="" loading="lazy" />
+                    <img src={asset(item.image)} alt="" loading="lazy" />
                   </div>
                   <div className={styles.menuItemContent}>
                     <div className={styles.itemHeading}>
@@ -461,7 +462,7 @@ const HeroSection = () => {
         <main>
           <section className={styles.homeHero} aria-label="Grounded Brew Café introduction">
             <video className={styles.video} autoPlay loop muted playsInline>
-              <source src="/cofe.mp4" type="video/mp4" />
+              <source src={asset('/cofe.mp4')} type="video/mp4" />
             </video>
             <div className={styles.overlay} />
           </section>
@@ -489,7 +490,7 @@ const HeroSection = () => {
                       aria-label={`${item.soldOut ? 'Sold out: ' : 'Select '}${item.name}, ${item.priceDisplay}`}
                     >
                       <div className={styles.menuItemImage}>
-                        <img src={item.image} alt="" loading="lazy" />
+                        <img src={asset(item.image)} alt="" loading="lazy" />
                       </div>
                       <div className={styles.menuItemContent}>
                         <div className={styles.itemHeading}>
@@ -616,7 +617,7 @@ const HeroSection = () => {
             onClick={(event) => event.stopPropagation()}
           >
             <video className={styles.authVideo} autoPlay loop muted playsInline aria-hidden="true">
-              <source src="/login.mp4" type="video/mp4" />
+              <source src={asset('/login.mp4')} type="video/mp4" />
             </video>
             <div className={styles.authScrim} />
             <div className={styles.authContent}>
@@ -762,7 +763,7 @@ const HeroSection = () => {
                 <p className={styles.cartEmpty}>Your cart is empty. Browse Order Online to add something delicious.</p>
               ) : cart.map((item) => (
                 <div key={item.cartId} className={styles.cartItem}>
-                  <img src={item.image} alt="" className={styles.cartItemImg} />
+                  <img src={asset(item.image)} alt="" className={styles.cartItemImg} />
                   <div className={styles.cartItemInfo}>
                     <div className={styles.cartItemName}>{item.name}</div>
                     <div className={styles.cartItemPrice}>{item.priceDisplay}</div>
