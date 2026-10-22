@@ -1,0 +1,25 @@
+:root {
+  --color-1: #531718;
+  --color-5: #F15F51;
+  --color-6: #F57F29;
+  --color-7: #F6EED7;
+  --color-8: #FFFFFF;
+  --border-color: #69727D;
+  --radius-sm: 3px;
+  --radius-md: 50px;
+  --transition-base: 0.3s ease;
+  font-family: 'Montserrat', sans-serif;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Montserrat', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}

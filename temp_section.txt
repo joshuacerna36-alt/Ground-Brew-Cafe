@@ -1,0 +1,161 @@
+﻿      {/* Hero Animated Content Overlay */}
+      <div className={styles.heroContent}>
+      </div>
+
+      {/* Featured Menu Section */}
+      <section className={styles.menuSection}>
+        <div className={styles.menuContainer}>
+          <motion.h2 
+            className={styles.menuTitle}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+          >
+            Our Features
+          </motion.h2>
+          
+          <div className={styles.featureTabs}>
+            {features.map((feature, i) => (
+              <motion.button
+                key={feature}
+                className={`${styles.featureTab} ${activeMenu === feature ? styles.activeTab : ''}`}
+                onClick={() => setActiveMenu(activeMenu === feature ? null : feature)}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1, duration: 0.5 }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                {feature}
+              </motion.button>
+            ))}
+          </div>
+
+          {activeMenu && (
+            <motion.div 
+              className={styles.menuItemsGrid}
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              {menuData[activeMenu].map((item, i) => (
+                <motion.div
+                  key={item.name}
+                  className={styles.menuItem}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.1 }}
+                  whileHover={{ scale: 1.02, boxShadow: '0 8px 25px rgba(83, 23, 24, 0.15)' }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <div className={styles.menuItemImage}>
+                    <img src={item.image} alt={item.name} />
+                  </div>
+                  <div className={styles.menuItemContent}>
+                    <h3 className={styles.menuItemName}>{item.name}</h3>
+                    <p className={styles.menuItemPrice}>{item.priceDisplay}</p>
+                    <p className={styles.menuItemDescription}>{item.description}</p>
+                    <motion.button
+                      className={styles.addToCartBtn}
+                      onClick={(e) => { e.stopPropagation(); addToCart(item); }}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      Add to Cart
+                    </motion.button>
+                  </div>
+                </motion.div>
+              ))}
+            </motion.div>
+          )}
+      </section>
+
+      {/* Cart Panel */}
+      {showCart && (
+        <motion.div 
+          className={styles.cartOverlay}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+        >
+          <motion.div 
+            className={styles.cartPanel}
+            initial={{ x: '100%' }}
+            animate={{ x: 0 }}
+            transition={{ type: 'tween' }}
+          >
+            <div className={styles.cartHeader}>
+              <h2 className={styles.cartTitle}>Order List</h2>
+              <button className={styles.cartClose} onClick={() => setShowCart(false)}>&#10005;</button>
+            </div>
+            <div className={styles.cartItems}>
+              {cart.length === 0 ? (
+                <p className={styles.cartEmpty}>Your cart is empty</p>
+              ) : (
+                cart.map((item) => (
+                  <div key={item.cartId} className={styles.cartItem}>
+                    <img src={item.image} alt={item.name} className={styles.cartItemImg} />
+                    <div className={styles.cartItemInfo}>
+                      <div className={styles.cartItemName}>{item.name}</div>
+                      <div className={styles.cartItemPrice}>{item.priceDisplay}</div>
+                    </div>
+                    <button className={styles.cartRemove} onClick={() => removeFromCart(item.cartId)}>Remove</button>
+                  </div>
+                ))
+              )}
+            </div>
+            {cart.length > 0 && (
+              <div className={styles.cartFooter}>
+                <div className={styles.cartTotal}>
+                  <span>Total:</span>
+                  <span>${getCartTotal()}</span>
+                </div>
+                <button className={styles.cartCheckout} onClick={handleProceedToPayment}>Proceed to Payment</button>
+              </div>
+            )}
+          </motion.div>
+        </motion.div>
+      )}
+
+      {/* Payment Panel */}
+      {showPayment && (
+        <motion.div 
+          className={styles.cartOverlay}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+        >
+          <motion.div 
+            className={styles.paymentPanel}
+            initial={{ scale: 0.9 }}
+            animate={{ scale: 1 }}
+          >
+            <div className={styles.cartHeader}>
+              <h2 className={styles.cartTitle}>Payment</h2>
+              <button className={styles.cartClose} onClick={() => setShowPayment(false)}>&#10005;</button>
+            </div>
+            <div className={styles.paymentContent}>
+              <div className={styles.paymentTotal}>
+                <span>Total Amount:</span>
+                <span className={styles.paymentAmount}>${getCartTotal()}</span>
+              </div>
+              <div className={styles.paymentForm}>
+                <input type="text" placeholder="Card Number" className={styles.paymentInput} />
+                <div className={styles.paymentRow}>
+                  <input type="text" placeholder="MM/YY" className={styles.paymentInput} />
+                  <input type="text" placeholder="CVV" className={styles.paymentInput} />
+                </div>
+                <input type="text" placeholder="Cardholder Name" className={styles.paymentInput} />
+              </div>
+              <button className={styles.paymentBtn} onClick={handlePaymentComplete}>Complete Payment</button>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </div>
+  )
+}
+
+export default HeroSection
+
+

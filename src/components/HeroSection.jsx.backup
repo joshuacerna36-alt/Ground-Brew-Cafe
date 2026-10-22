@@ -1,0 +1,443 @@
+import React, { useState } from 'react'
+import { motion } from 'framer-motion'
+import styles from './HeroSection.module.css'
+
+const menuData = {
+  'Coffee Brewed': [
+    { id: 1, name: 'Pour-Over', price: 4.50, priceDisplay: '$4.50', description: 'Slow-dripped perfection with floral notes.', image: '/Pour-over Coffee.png' },
+    { id: 2, name: 'French Press', price: 4.25, priceDisplay: '$4.25', description: 'Full-bodied and rich with robust flavor.', image: '/French Press.png' },
+    { id: 3, name: 'Espresso', price: 3.75, priceDisplay: '$3.75', description: 'Concentrated shot of bold, intense coffee.', image: '/Espresso.png' },
+    { id: 4, name: 'Crema Coffee', price: 5.25, priceDisplay: '$5.25', description: 'Velvety smooth with a luxurious crema.', image: '/Crema Coffee.png' }
+  ],
+  'Milkshakes': [
+    { id: 5, name: 'Vanilla Milkshake', price: 6.50, priceDisplay: '$6.50', description: 'Classic creamy vanilla indulgence.', image: '/Vanilla Milkshake.png' },
+    { id: 6, name: 'Oreo Milkshake', price: 7.25, priceDisplay: '$7.25', description: 'Blended with crushed Oreos and vanilla ice cream.', image: '/Oreo Milkshake.png' },
+    { id: 7, name: 'Strawberry Milkshake', price: 6.75, priceDisplay: '$6.75', description: 'Fresh strawberry flavor with whipped cream.', image: '/Strawberry Milkshake.png' },
+    { id: 8, name: 'Chocolate Milkshake', price: 7.00, priceDisplay: '$7.00', description: 'Rich chocolate delight topped with cream.', image: '/Chocolate Milkshake.png' }
+  ],
+  'Breads': [
+    { id: 9, name: 'Sourdough', price: 5.50, priceDisplay: '$5.50', description: 'Artisan sourdough with a crispy crust.', image: '/Sourdough.png' },
+    { id: 10, name: 'Baguette', price: 4.25, priceDisplay: '$4.25', description: 'Crispy French baguette, perfect for any meal.', image: '/Baguette.png' },
+    { id: 11, name: 'Brioche', price: 6.00, priceDisplay: '$6.00', description: 'Buttery, soft, and slightly sweet brioche.', image: '/Brioche.png' },
+    { id: 12, name: 'Ciabatta', price: 5.25, priceDisplay: '$5.25', description: 'Rustic Italian bread with airy texture.', image: '/Ciabatta.png' },
+    { id: 13, name: 'Focaccia', price: 5.75, priceDisplay: '$5.75', description: 'Herb-infused focaccia with olive oil.', image: '/Focaccia.png' }
+  ]
+}
+
+// Binary search to find item by name
+const binarySearchMenuItems = (items, searchTerm) => {
+  if (!searchTerm) return items
+  const results = []
+  const term = searchTerm.toLowerCase()
+  for (let i = 0; i < items.length; i++) {
+    if (items[i].name.toLowerCase().includes(term)) {
+      results.push(items[i])
+    }
+  }
+  return results
+}
+
+const HeroSection = () => {
+  const [shopDropdown, setShopDropdown] = useState(false)
+  const [shopPanel, setShopPanel] = useState(null)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [activeMenu, setActiveMenu] = useState(null)
+  const [cart, setCart] = useState([])
+  const [showCart, setShowCart] = useState(false)
+  const [showPayment, setShowPayment] = useState(false)
+  const [globalSearch, setGlobalSearch] = useState('')
+  const [globalSearchResults, setGlobalSearchResults] = useState([])
+  const [showGlobalSearch, setShowGlobalSearch] = useState(false)
+
+  const navVariants = {
+    hidden: { opacity: 0, y: -20 },
+    visible: { opacity: 1, y: 0 }
+  }
+
+  const navItemVariants = {
+    hidden: { opacity: 0, y: -10 },
+    visible: (i) => ({
+      opacity: 1,
+      y: 0,
+      transition: { delay: i * 0.05 }
+    })
+  }
+
+  const heroVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: "easeOut" } }
+  }
+
+  const shopCategories = ["Coffee Brewed", "Milkshakes", "Breads"]
+  const features = ["Coffee Brewed", "Milkshakes", "Breads"]
+
+  const handleShopCategoryClick = (category) => {
+    setShopPanel(category)
+    setShopDropdown(false)
+    setSearchTerm('')
+  }
+
+  const closeShopPanel = () => {
+    setShopPanel(null)
+    setSearchTerm('')
+  }
+
+  const getDisplayItems = () => {
+    if (!shopPanel) return []
+    const items = menuData[shopPanel] || []
+    return binarySearchMenuItems(items, searchTerm)
+  }
+
+  const addToCart = (item) => {
+    setCart([...cart, { ...item, cartId: Date.now() }])
+  }
+
+  const removeFromCart = (cartId) => {
+    setCart(cart.filter(item => item.cartId !== cartId))
+  }
+
+  const getCartTotal = () => {
+    return cart.reduce((sum, item) => sum + item.price, 0).toFixed(2)
+  }
+
+  const handleOrderOnline = () => {
+    setShowCart(true)
+  }
+
+  const handleSearch = () => {
+    setShowGlobalSearch(!showGlobalSearch)
+    if (!showGlobalSearch) {
+      setGlobalSearch('')
+      setGlobalSearchResults([])
+    }
+  }
+
+  const performGlobalSearch = (term) => {
+    setGlobalSearch(term)
+    if (!term) {
+      setGlobalSearchResults([])
+      return
+    }
+    const results = []
+    Object.keys(menuData).forEach(category => {
+      menuData[category].forEach(item => {
+        if (item.name.toLowerCase().includes(term.toLowerCase())) {
+          results.push({ ...item, category })
+        }
+      })
+    })
+    setGlobalSearchResults(results)
+  }
+
+  const handleProceedToPayment = () => {
+    setShowCart(false)
+    setShowPayment(true)
+  }
+
+  const handlePaymentComplete = () => {
+    alert('Payment successful! Order placed.')
+    setCart([])
+    setShowPayment(false)
+  }
+
+
+  return (
+    <div className={styles.heroContainer}>
+      {/* Top Alert Bar */}
+      <motion.div 
+        className={styles.alertBar}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.3 }}
+      >
+        Alert bar
+      </motion.div>
+
+      {/* Navigation Header */}
+      <motion.header 
+        className={styles.header}
+        variants={navVariants}
+        initial="hidden"
+        animate="visible"
+        transition={{ duration: 0.4 }}
+      >
+        <div className={styles.navContainer}>
+          <motion.div 
+            className={styles.logo}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            Coffeebar
+          </motion.div>
+          
+          <nav className={styles.navLinks}>
+            <div className={styles.shopDropdownContainer}>
+              <motion.a
+                href="#"
+                className={styles.navLink}
+                onClick={(e) => { e.preventDefault(); setShopDropdown(!shopDropdown); }}
+                whileHover={{ scale: 1.05, color: '#F57F29' }}
+                whileTap={{ scale: 0.95 }}
+              >
+                SHOP ▼
+              </motion.a>
+              {shopDropdown && (
+                <motion.div 
+                  className={styles.shopDropdown}
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  {shopCategories.map((category) => (
+                    <div
+                      key={category}
+                      className={styles.shopDropdownItem}
+                      onClick={() => handleShopCategoryClick(category)}
+                    >
+                      {category}
+                    </div>
+                  ))}
+                </motion.div>
+              )}
+            </div>
+          </nav>
+
+          <div className={styles.navActions}>
+            <motion.div 
+              className={styles.cart}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setShowCart(true)}
+              style={{ cursor: 'pointer' }}
+            >
+              🛒 <span>${getCartTotal()}</span>
+            </motion.div>
+            <motion.button 
+              className={styles.orderBtn}
+              whileHover={{ scale: 1.05, backgroundColor: '#F15F51' }}
+              whileTap={{ scale: 0.95 }}
+              transition={{ duration: 0.2 }}
+              onClick={handleOrderOnline}
+            >
+              Order Online
+            </motion.button>
+            <motion.button 
+              className={styles.searchBtn}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleSearch}
+            >
+              🔍
+            </motion.button>
+          </div>
+        </div>
+      </motion.header>
+
+      {/* Global Search */}
+      {showGlobalSearch && (
+        <motion.div 
+          className={styles.globalSearchBar}
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <input
+            type="text"
+            placeholder="Search all menu items..."
+            value={globalSearch}
+            onChange={(e) => performGlobalSearch(e.target.value)}
+            className={styles.globalSearchInput}
+            autoFocus
+          />
+          {globalSearchResults.length > 0 && (
+            <div className={styles.globalSearchResults}>
+              {globalSearchResults.map((item) => (
+                <div key={item.id} className={styles.globalSearchItem} onClick={() => { addToCart(item); setShowGlobalSearch(false); }}>
+                  <img src={item.image} alt={item.name} />
+                  <div>
+                    <div className={styles.globalSearchItemName}>{item.name}</div>
+                    <div className={styles.globalSearchItemPrice}>{item.priceDisplay}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </motion.div>
+      )}
+
+      {/* Hero Video Container */}
+      <div className={styles.videoContainer}>
+        <video
+          className={styles.video}
+          autoPlay
+          loop
+          muted
+          playsInline
+        >
+          <source src="/cofe.mp4" type="video/mp4" />
+        </video>
+        <div className={styles.overlay}></div>
+      </div>
+
+      {/* Hero Animated Content Overlay */}
+      <div className={styles.heroContent}>
+      </div>
+
+      {/* Featured Menu Section */}
+      <section className={styles.menuSection}>
+        <div className={styles.menuContainer}>
+          <motion.h2 
+            className={styles.menuTitle}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+          >
+            Our Features
+          </motion.h2>
+          
+          <div className={styles.featureTabs}>
+            {features.map((feature, i) => (
+              <motion.button
+                key={feature}
+                className={`${styles.featureTab} ${activeMenu === feature ? styles.activeTab : ''}`}
+                onClick={() => setActiveMenu(activeMenu === feature ? null : feature)}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1, duration: 0.5 }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                {feature}
+              </motion.button>
+            ))}
+          </div>
+
+          {activeMenu && (
+            <motion.div 
+              className={styles.menuItemsGrid}
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              {menuData[activeMenu].map((item, i) => (
+                <motion.div
+                  key={item.name}
+                  className={styles.menuItem}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.1 }}
+                  whileHover={{ scale: 1.02, boxShadow: '0 8px 25px rgba(83, 23, 24, 0.15)' }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <div className={styles.menuItemImage}>
+                    <img src={item.image} alt={item.name} />
+                  </div>
+                  <div className={styles.menuItemContent}>
+                    <h3 className={styles.menuItemName}>{item.name}</h3>
+                    <p className={styles.menuItemPrice}>{item.priceDisplay}</p>
+                    <p className={styles.menuItemDescription}>{item.description}</p>
+                    <motion.button
+                      className={styles.addToCartBtn}
+                      onClick={(e) => { e.stopPropagation(); addToCart(item); }}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      Add to Cart
+                    </motion.button>
+                  </div>
+                </motion.div>
+              ))}
+            </motion.div>
+          )}
+      </section>
+
+      {/* Cart Panel */}
+      {showCart && (
+        <motion.div 
+          className={styles.cartOverlay}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+        >
+          <motion.div 
+            className={styles.cartPanel}
+            initial={{ x: '100%' }}
+            animate={{ x: 0 }}
+            transition={{ type: 'tween' }}
+          >
+            <div className={styles.cartHeader}>
+              <h2 className={styles.cartTitle}>Order List</h2>
+              <button className={styles.cartClose} onClick={() => setShowCart(false)}>&#10005;</button>
+            </div>
+            <div className={styles.cartItems}>
+              {cart.length === 0 ? (
+                <p className={styles.cartEmpty}>Your cart is empty</p>
+              ) : (
+                cart.map((item) => (
+                  <div key={item.cartId} className={styles.cartItem}>
+                    <img src={item.image} alt={item.name} className={styles.cartItemImg} />
+                    <div className={styles.cartItemInfo}>
+                      <div className={styles.cartItemName}>{item.name}</div>
+                      <div className={styles.cartItemPrice}>{item.priceDisplay}</div>
+                    </div>
+                    <button className={styles.cartRemove} onClick={() => removeFromCart(item.cartId)}>Remove</button>
+                  </div>
+                ))
+              )}
+            </div>
+            {cart.length > 0 && (
+              <div className={styles.cartFooter}>
+                <div className={styles.cartTotal}>
+                  <span>Total:</span>
+                  <span>${getCartTotal()}</span>
+                </div>
+                <button className={styles.cartCheckout} onClick={handleProceedToPayment}>Proceed to Payment</button>
+              </div>
+            )}
+          </motion.div>
+        </motion.div>
+      )}
+
+      {/* Payment Panel */}
+      {showPayment && (
+        <motion.div 
+          className={styles.cartOverlay}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+        >
+          <motion.div 
+            className={styles.paymentPanel}
+            initial={{ scale: 0.9 }}
+            animate={{ scale: 1 }}
+          >
+            <div className={styles.cartHeader}>
+              <h2 className={styles.cartTitle}>Payment</h2>
+              <button className={styles.cartClose} onClick={() => setShowPayment(false)}>&#10005;</button>
+            </div>
+            <div className={styles.paymentContent}>
+              <div className={styles.paymentTotal}>
+                <span>Total Amount:</span>
+                <span className={styles.paymentAmount}>${getCartTotal()}</span>
+              </div>
+              <div className={styles.paymentForm}>
+                <input type="text" placeholder="Card Number" className={styles.paymentInput} />
+                <div className={styles.paymentRow}>
+                  <input type="text" placeholder="MM/YY" className={styles.paymentInput} />
+                  <input type="text" placeholder="CVV" className={styles.paymentInput} />
+                </div>
+                <input type="text" placeholder="Cardholder Name" className={styles.paymentInput} />
+              </div>
+              <button className={styles.paymentBtn} onClick={handlePaymentComplete}>Complete Payment</button>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </div>
+  )
+}
+
+export default HeroSection
+
+
+
+

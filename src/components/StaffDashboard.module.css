@@ -1,0 +1,343 @@
+.page {
+  min-height: calc(100vh - 110px);
+  padding: 48px max(20px, calc((100% - 1120px) / 2)) 72px;
+  background: #fcfaf7;
+  color: #3f3029;
+}
+
+.heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 28px;
+}
+
+.heading h1,
+.accounts h2 {
+  margin: 0 0 8px;
+  color: #531718;
+  font: 700 clamp(25px, 4vw, 36px) 'Montserrat', sans-serif;
+}
+
+.heading p,
+.accounts > p {
+  margin: 0;
+  color: #665b56;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.eyebrow {
+  margin-bottom: 8px !important;
+  color: #f57f29 !important;
+  font-size: 12px !important;
+  font-weight: 700;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.refresh,
+.action,
+.cancel {
+  min-height: 42px;
+  border: 0;
+  border-radius: 5px;
+  padding: 10px 14px;
+  background: #f57f29;
+  color: #fff;
+  font: 600 12px 'Montserrat', sans-serif;
+  cursor: pointer;
+}
+
+.refresh:disabled,
+.action:disabled,
+.cancel:disabled {
+  opacity: .65;
+  cursor: wait;
+}
+
+.orderList {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(420px, 100%), 1fr));
+  gap: 18px;
+}
+
+.orderCard,
+.accounts {
+  border: 1px solid #eee4dc;
+  border-radius: 10px;
+  padding: 20px;
+  background: #fff;
+  box-shadow: 0 5px 18px rgba(83, 23, 24, .06);
+}
+
+.orderTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.orderTop h2 {
+  margin: 4px 0;
+  color: #531718;
+  font-size: 17px;
+}
+
+.orderTop h2 span,
+.orderTop p {
+  color: #665b56;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.orderNumber {
+  margin: 0;
+  color: #f57f29;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .06em;
+}
+
+.status {
+  flex-shrink: 0;
+  border-radius: 20px;
+  padding: 6px 10px;
+  background: #fff3e8;
+  color: #8a4b1e;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.status_completed {
+  background: #e7f5ea;
+  color: #28633b;
+}
+
+.status_cancelled {
+  background: #fdebea;
+  color: #9a332e;
+}
+
+.scheduled {
+  margin: 16px 0 5px;
+  color: #531718;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.address,
+.payment {
+  margin: 6px 0;
+  color: #665b56;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.items {
+  display: grid;
+  gap: 8px;
+  margin: 16px 0 12px;
+  padding: 0;
+  list-style: none;
+}
+
+.items li,
+.amounts p {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0;
+  color: #574a44;
+  font-size: 12px;
+}
+
+.amounts {
+  display: grid;
+  gap: 7px;
+  border-top: 1px solid #eee4dc;
+  padding-top: 12px;
+}
+
+.amounts .total {
+  color: #531718;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.payment {
+  margin: 12px 0 0;
+  text-transform: capitalize;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.action {
+  min-height: 38px;
+  padding: 8px 10px;
+}
+
+.cancel {
+  min-height: 38px;
+  padding: 8px 10px;
+  border: 1px solid #c65b50;
+  background: #fff;
+  color: #a64137;
+}
+
+.accounts {
+  margin-top: 34px;
+}
+
+.accounts h2 {
+  font-size: 23px;
+}
+
+.accountList {
+  margin-top: 18px;
+  border-top: 1px solid #eee4dc;
+}
+
+.accountRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid #eee4dc;
+}
+
+.accountRow > span:first-child {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.accountRow strong {
+  color: #531718;
+  font-size: 13px;
+}
+
+.accountRow small {
+  overflow-wrap: anywhere;
+  color: #665b56;
+  font-size: 11px;
+}
+
+.adminBadge {
+  color: #9a5b23;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.roleLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #665b56;
+  font-size: 12px;
+}
+
+.roleLabel select {
+  min-height: 38px;
+  border: 1px solid #eadfd7;
+  border-radius: 5px;
+  padding: 5px 8px;
+  background: #fff;
+  color: #531718;
+  font: 600 12px 'Montserrat', sans-serif;
+}
+
+.accountActions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 9px;
+}
+
+.accountStatusActive,
+.accountStatusInactive {
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.accountStatusActive {
+  color: #28633b;
+}
+
+.accountStatusInactive {
+  color: #9a332e;
+}
+
+.accountButton,
+.deleteAccountButton {
+  min-height: 38px;
+  border: 1px solid #eadfd7;
+  border-radius: 5px;
+  padding: 8px 10px;
+  background: #fff;
+  color: #531718;
+  font: 600 11px 'Montserrat', sans-serif;
+  cursor: pointer;
+}
+
+.deleteAccountButton {
+  border-color: #c65b50;
+  color: #a64137;
+}
+
+.accountButton:disabled,
+.deleteAccountButton:disabled {
+  opacity: .65;
+  cursor: wait;
+}
+
+.empty {
+  border: 1px dashed #d8c7ba;
+  border-radius: 8px;
+  padding: 22px;
+  background: #fff;
+  color: #665b56;
+  text-align: center;
+}
+
+.error {
+  margin: 0 0 18px;
+  border-left: 3px solid #bf423a;
+  padding: 10px 13px;
+  background: #fff0ed;
+  color: #7c2c27;
+  font-size: 13px;
+}
+
+@media (max-width: 560px) {
+  .page {
+    padding: 32px 14px 48px;
+  }
+
+  .heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .refresh {
+    width: 100%;
+  }
+
+  .orderCard,
+  .accounts {
+    padding: 16px;
+  }
+
+  .accountActions {
+    justify-content: flex-start;
+  }
+}
