@@ -10,7 +10,50 @@
     <title>Grounded Brew Café</title>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <main class="startup-message">
+        <h1>Start Grounded Brew Café</h1>
+        <p>This React app needs its development server. Opening <code>index.html</code> with Live Server will not run the app.</p>
+        <ol>
+          <li>Open a terminal in the café project folder.</li>
+          <li>Run <code>npm run dev</code>.</li>
+          <li>Open the local URL printed in the terminal, usually <code>http://localhost:5173</code>.</li>
+        </ol>
+      </main>
+    </div>
     <script type="module" src="/src/main.jsx"></script>
+    <style>
+      .startup-message {
+        box-sizing: border-box;
+        max-width: 620px;
+        margin: 12vh auto;
+        padding: 32px;
+        border: 1px solid #eadfd7;
+        border-radius: 12px;
+        background: #fff;
+        color: #3f3029;
+        font: 16px/1.6 Montserrat, Arial, sans-serif;
+        box-shadow: 0 8px 28px rgba(83, 23, 24, .1);
+      }
+
+      .startup-message h1 {
+        margin-top: 0;
+        color: #531718;
+      }
+
+      .startup-message code {
+        border-radius: 4px;
+        padding: 2px 5px;
+        background: #f6eee8;
+        color: #531718;
+      }
+
+      @media (max-width: 680px) {
+        .startup-message {
+          margin: 24px 16px;
+          padding: 24px;
+        }
+      }
+    </style>
   </body>
 </html>

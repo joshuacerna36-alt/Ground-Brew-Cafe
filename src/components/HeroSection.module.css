@@ -307,6 +307,102 @@
   background: #fcfaf7;
 }
 
+.infoPage {
+  width: min(760px, 100%);
+  margin: 0 auto;
+  text-align: center;
+}
+
+.infoIntro {
+  max-width: 620px;
+  margin: 0 auto 34px;
+  color: #665b56;
+  font-size: 16px;
+  line-height: 1.8;
+}
+
+.missionCard {
+  padding: 32px;
+  border: 1px solid #eee4dc;
+  border-radius: 8px;
+  background: #fff;
+  text-align: left;
+}
+
+.missionCard .featureAccent {
+  margin-bottom: 18px;
+}
+
+.missionCard h2 {
+  margin-bottom: 12px;
+  color: #531718;
+  font-size: 23px;
+}
+
+.missionCard p {
+  color: #665b56;
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+.infoAction {
+  min-height: 46px;
+  margin-top: 26px;
+  border: 0;
+  border-radius: 24px;
+  padding: 0 22px;
+  background: #f57f29;
+  color: #fff;
+  font: 700 13px 'Montserrat', sans-serif;
+  cursor: pointer;
+  transition: background-color var(--transition-base), transform var(--transition-base);
+}
+
+.infoAction:hover {
+  background: #d95e12;
+  transform: translateY(-2px);
+}
+
+.infoAction:focus-visible,
+.contactSocialLink:focus-visible {
+  outline: 3px solid #531718;
+  outline-offset: 3px;
+}
+
+.contactSocials {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 36px;
+}
+
+.contactSocialLink {
+  min-height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid #eee4dc;
+  border-radius: 8px;
+  padding: 16px 20px;
+  background: #fff;
+  color: #531718;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: border-color var(--transition-base), transform var(--transition-base);
+}
+
+.contactSocialLink span:last-child {
+  color: #f57f29;
+  font-size: 18px;
+}
+
+.contactSocialLink:hover {
+  border-color: #f57f29;
+  transform: translateY(-2px);
+}
+
 .catalogPage > .menuContainer > .eyebrow,
 .catalogPage > .menuContainer > .menuTitle {
   text-align: center;
@@ -1499,6 +1595,15 @@
 
   .catalogPage {
     padding: 48px 20px 60px;
+  }
+
+  .missionCard {
+    padding: 24px;
+  }
+
+  .contactSocials {
+    grid-template-columns: 1fr;
+    margin-top: 28px;
   }
 
   .footerMain {

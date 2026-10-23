@@ -418,7 +418,9 @@ const HeroSection = () => {
             {[
               { label: 'Home', page: 'Home' },
               { label: 'Menu', page: 'Menu' },
-              { label: 'Order Online', page: 'Order Online' }
+              { label: 'Order Online', page: 'Order Online' },
+              { label: 'About', page: 'About' },
+              { label: 'Contact', page: 'Contact' }
             ].map(({ label, page }) => (
               <button
                 key={label}
@@ -534,6 +536,58 @@ const HeroSection = () => {
         </main>
       )}
 
+      {activePage === 'About' && (
+        <main className={styles.catalogPage}>
+          <section className={styles.infoPage} aria-labelledby="about-title">
+            <p className={styles.eyebrow}>A little about us</p>
+            <h1 className={styles.menuTitle} id="about-title">Grounded in good coffee</h1>
+            <p className={styles.infoIntro}>
+              Grounded Brew Café is all about thoughtfully made coffee, comforting bites, and
+              creating a welcoming place to enjoy the moment.
+            </p>
+            <div className={styles.missionCard}>
+              <span className={styles.featureAccent} />
+              <h2>Our mission</h2>
+              <p>
+                We believe a good cup can make an everyday moment feel special. Our mission is
+                to serve enjoyable drinks and food with care, bringing people together one
+                freshly made order at a time.
+              </p>
+            </div>
+            <button className={styles.infoAction} onClick={() => setActivePage('Menu')}>
+              Explore our menu
+            </button>
+          </section>
+        </main>
+      )}
+
+      {activePage === 'Contact' && (
+        <main className={styles.catalogPage}>
+          <section className={styles.infoPage} aria-labelledby="contact-title">
+            <p className={styles.eyebrow}>We'd love to hear from you</p>
+            <h1 className={styles.menuTitle} id="contact-title">Connect with us</h1>
+            <p className={styles.infoIntro}>
+              Follow Grounded Brew Café on social media for fresh brews, menu updates, and more.
+            </p>
+            <div className={styles.contactSocials} aria-label="Grounded Brew Café social media">
+              {socialLinks.map(({ label, href }) => (
+                <a
+                  className={styles.contactSocialLink}
+                  key={label}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={`Visit Grounded Brew Café on ${label} (opens in a new tab)`}
+                >
+                  <span>{label}</span>
+                  <span aria-hidden="true">↗</span>
+                </a>
+              ))}
+            </div>
+          </section>
+        </main>
+      )}
+
       {activePage === 'My Orders' && authUser && (
         <main className={styles.catalogPage}>
           <div className={styles.menuContainer}>
@@ -631,9 +685,7 @@ const HeroSection = () => {
               <img className={styles.authLogo} src={logo} alt="Grounded Brew Café" />
               <h2 id="auth-title">{authMode === 'login' ? 'Welcome back' : 'Create your account'}</h2>
               <p className={styles.authIntro}>
-                {pendingItem
-                  ? `Sign in or register to add ${pendingItem.name} to your order.`
-                  : 'Sign in or create an account to continue.'}
+                We're glad you're here—let's make your next coffee moment a good one.
               </p>
               <div className={styles.authModes} role="tablist" aria-label="Account options">
                 {['login', 'register'].map((mode) => (
