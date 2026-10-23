@@ -1719,7 +1719,14 @@
   }
 
   .homeHero {
-    height: clamp(400px, 68vh, 620px);
+    height: auto;
+    min-height: 0;
+    aspect-ratio: 16 / 9;
+  }
+
+  .homeHero .video {
+    width: 100%;
+    object-fit: contain;
   }
 
   .catalogPage {
