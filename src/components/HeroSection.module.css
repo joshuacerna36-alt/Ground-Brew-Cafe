@@ -52,22 +52,37 @@
 }
 
 .navLink {
-  border: 0;
-  padding: 10px 0;
+  position: relative;
+  min-height: 42px;
+  display: inline-grid;
+  place-items: center;
+  border: 2px solid transparent;
+  border-radius: 7px;
+  padding: 7px 10px;
   background: transparent;
   color: #4a3430;
   font: 600 14px 'Montserrat', sans-serif;
   cursor: pointer;
-  transition: color var(--transition-base);
+  white-space: nowrap;
+  transition: color var(--transition-base), background-color var(--transition-base), border-color var(--transition-base), box-shadow var(--transition-base), transform var(--transition-base);
 }
 
-.navLink:hover,
-.navLinkActive {
+.navLink:hover {
   color: #f57f29;
 }
 
 .navLinkActive {
-  box-shadow: inset 0 -2px #f57f29;
+  border-color: #531718;
+  background: #fffaf4;
+  color: #531718;
+  box-shadow: 0 3px 0 #381011, 0 5px 10px rgba(83, 23, 24, 0.16);
+  transform: translateY(-1px);
+}
+
+.navLink:focus-visible {
+  outline: 3px solid #f57f29;
+  outline-offset: 3px;
+  z-index: 1;
 }
 
 .cart {
@@ -374,6 +389,120 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 14px;
   margin-top: 36px;
+}
+
+.contactLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: stretch;
+  gap: 22px;
+  margin-top: 32px;
+  text-align: left;
+}
+
+.contactDetails {
+  display: grid;
+  gap: 12px;
+}
+
+.contactDetail {
+  min-width: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  border: 1px solid #eee4dc;
+  border-radius: 8px;
+  padding: 16px;
+  background: #fff;
+  color: #531718;
+  text-decoration: none;
+  transition: border-color var(--transition-base), transform var(--transition-base);
+}
+
+.contactDetail:hover {
+  border-color: #f57f29;
+  transform: translateY(-2px);
+}
+
+.contactDetail:focus-visible,
+.contactMap a:focus-visible {
+  outline: 3px solid #f57f29;
+  outline-offset: 3px;
+}
+
+.contactIcon {
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #fff2e7;
+  color: #d95e12;
+}
+
+.contactIcon svg {
+  width: 21px;
+  height: 21px;
+}
+
+.contactDetailText {
+  min-width: 0;
+  display: grid;
+  gap: 5px;
+  padding-top: 1px;
+  overflow-wrap: anywhere;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.contactDetailText strong {
+  color: #531718;
+  font-size: 13px;
+}
+
+.contactDetailText > span {
+  color: #665b56;
+}
+
+.contactDetailText .contactDetailAction {
+  color: #d95e12;
+  font-weight: 700;
+}
+
+.contactMap {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid #eee4dc;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.contactMap iframe {
+  width: 100%;
+  min-height: 350px;
+  flex: 1;
+  border: 0;
+}
+
+.contactMap > a {
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 16px;
+  background: #531718;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: background-color var(--transition-base);
+}
+
+.contactMap > a:hover {
+  background: #d95e12;
 }
 
 .contactSocialLink {
@@ -1604,6 +1733,17 @@
   .contactSocials {
     grid-template-columns: 1fr;
     margin-top: 28px;
+  }
+
+  .contactLayout {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    margin-top: 26px;
+  }
+
+  .contactMap iframe {
+    min-height: 300px;
+    flex: none;
   }
 
   .footerMain {

@@ -120,6 +120,25 @@ const socialLinks = [
   { label: 'Instagram', href: 'https://www.instagram.com/ft.joswa?exIn=MTZ5czVIY2RsN2Zsda==' },
   { label: 'Facebook', href: 'https://www.facebook.com/ft.joswa' }
 ]
+const cafeAddress = '3 Limaria Building Maa Road, Davao City, Philippines'
+const cafeAddressQuery = encodeURIComponent(cafeAddress)
+const cafeDirectionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${cafeAddressQuery}`
+const cafeMapEmbedUrl = `https://www.google.com/maps?q=${cafeAddressQuery}&output=embed`
+
+const ContactIcon = ({ type }) => {
+  const iconPaths = {
+    location: <><path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z" /><circle cx="12" cy="10" r="2.5" /></>,
+    phone: <path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.4 19.4 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 2 .7 2.9a2 2 0 0 1-.5 2.1L8 9.9a16 16 0 0 0 6 6l1.2-1.3a2 2 0 0 1 2.1-.5c.9.3 1.9.6 2.9.7a2 2 0 0 1 1.8 2.1Z" />,
+    email: <><rect x="3" y="5" width="18" height="14" rx="2" /><path d="m3 7 9 6 9-6" /></>,
+    instagram: <><rect x="3" y="3" width="18" height="18" rx="5" /><circle cx="12" cy="12" r="4" /><path d="M17.5 6.5h.01" /></>
+  }
+
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      {iconPaths[type]}
+    </svg>
+  )
+}
 
 const HeroSection = () => {
   const [activePage, setActivePage] = useState('Home')
@@ -428,7 +447,7 @@ const HeroSection = () => {
                 aria-current={activePage === page ? 'page' : undefined}
                 onClick={() => setActivePage(page)}
               >
-                {label}
+                <span>{label}</span>
               </button>
             ))}
           </nav>
@@ -567,8 +586,63 @@ const HeroSection = () => {
             <p className={styles.eyebrow}>We'd love to hear from you</p>
             <h1 className={styles.menuTitle} id="contact-title">Connect with us</h1>
             <p className={styles.infoIntro}>
-              Follow Grounded Brew Café on social media for fresh brews, menu updates, and more.
+              Visit us in Davao City, give us a call, or get in touch online.
             </p>
+            <div className={styles.contactLayout}>
+              <div className={styles.contactDetails}>
+                <a
+                  className={styles.contactDetail}
+                  href={cafeDirectionsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <span className={styles.contactIcon}><ContactIcon type="location" /></span>
+                  <span className={styles.contactDetailText}>
+                    <strong>Address</strong>
+                    <span>{cafeAddress}</span>
+                    <span className={styles.contactDetailAction}>Get directions ↗</span>
+                  </span>
+                </a>
+                <a className={styles.contactDetail} href="tel:+63822985820">
+                  <span className={styles.contactIcon}><ContactIcon type="phone" /></span>
+                  <span className={styles.contactDetailText}>
+                    <strong>Number</strong>
+                    <span>(082) 298 5820</span>
+                  </span>
+                </a>
+                <a className={styles.contactDetail} href="mailto:groundedbrewcafe@gmail.com">
+                  <span className={styles.contactIcon}><ContactIcon type="email" /></span>
+                  <span className={styles.contactDetailText}>
+                    <strong>Email</strong>
+                    <span>groundedbrewcafe@gmail.com</span>
+                  </span>
+                </a>
+                <a
+                  className={styles.contactDetail}
+                  href="https://www.instagram.com/groundedbrewcafe/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <span className={styles.contactIcon}><ContactIcon type="instagram" /></span>
+                  <span className={styles.contactDetailText}>
+                    <strong>Instagram</strong>
+                    <span>instagram.com/groundedbrewcafe</span>
+                  </span>
+                </a>
+              </div>
+              <div className={styles.contactMap}>
+                <iframe
+                  title="Google Maps location for Grounded Brew Café"
+                  src={cafeMapEmbedUrl}
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  allowFullScreen
+                />
+                <a href={cafeDirectionsUrl} target="_blank" rel="noopener noreferrer">
+                  Open in Google Maps
+                </a>
+              </div>
+            </div>
             <div className={styles.contactSocials} aria-label="Grounded Brew Café social media">
               {socialLinks.map(({ label, href }) => (
                 <a
