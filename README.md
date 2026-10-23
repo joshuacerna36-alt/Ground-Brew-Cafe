@@ -11,6 +11,8 @@ npm run dev
 
 The site opens at `http://127.0.0.1:5173`. To open it from a phone on the same Wi-Fi, start the server with `npm run dev -- --host 0.0.0.0`, then use the computer's local network IP and port.
 
+Website pictures are stored together in `public/images/`.
+
 ## Create the first administrator
 
 Administrator accounts are provisioned securely at server startup. Set these environment variables on the server before starting it:

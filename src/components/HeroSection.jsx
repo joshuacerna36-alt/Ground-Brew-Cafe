@@ -3,7 +3,14 @@ import styles from './HeroSection.module.css'
 import StaffDashboard from './StaffDashboard'
 
 const php = (value) => `₱${value.toFixed(2)}`
-const asset = (path) => `${import.meta.env.BASE_URL}${path.replace(/^\/+/, '')}`
+const asset = (path) => {
+  const normalizedPath = path.replace(/^\/+/, '')
+  const assetPath = /\.(png|jpe?g|gif|webp|svg|bmp|avif)$/i.test(normalizedPath)
+    ? `images/${normalizedPath}`
+    : normalizedPath
+
+  return `${import.meta.env.BASE_URL}${assetPath}`
+}
 
 // Legacy USD prices use the 2026-10-22 rate of PHP 63.509 per USD.
 const menuData = {
