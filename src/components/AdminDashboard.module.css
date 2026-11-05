@@ -1,0 +1,162 @@
+.shell {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 250px minmax(0, 1fr);
+  background: #f7f4f1;
+  color: #3f3029;
+}
+
+.sidebar {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 24px 16px;
+  background: #531718;
+  color: #fff;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 28px;
+}
+
+.brand > span {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #f57f29;
+  font-weight: 800;
+}
+
+.brand div {
+  display: grid;
+}
+
+.brand small {
+  margin-top: 2px;
+  color: #d9c8c6;
+}
+
+.nav {
+  display: grid;
+  gap: 7px;
+}
+
+.navGroup {
+  display: grid;
+}
+
+.navTrigger,
+.submenu button,
+.logout {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-family: inherit;
+}
+
+.navTrigger {
+  min-height: 44px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-radius: 7px;
+  padding: 10px 12px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.navTrigger:hover,
+.navTrigger[aria-expanded='true'] {
+  background: rgba(255, 255, 255, .1);
+}
+
+.submenu {
+  display: grid;
+  padding: 3px 0 5px 18px;
+}
+
+.submenu button {
+  min-height: 38px;
+  border-left: 1px solid rgba(255, 255, 255, .25);
+  padding: 8px 12px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.submenu button:hover,
+.submenuActive {
+  color: #ffad6d;
+}
+
+.logout {
+  min-height: 42px;
+  margin-top: auto;
+  border: 1px solid rgba(255,255,255,.25);
+  border-radius: 7px;
+  cursor: pointer;
+}
+
+.content {
+  min-width: 0;
+}
+
+.mobileHeader,
+.mobileNav {
+  display: none;
+}
+
+@media (max-width: 760px) {
+  .shell {
+    display: block;
+  }
+
+  .sidebar {
+    display: none;
+  }
+
+  .mobileHeader {
+    min-height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: #531718;
+    color: #fff;
+  }
+
+  .mobileHeader button {
+    border: 1px solid rgba(255,255,255,.4);
+    border-radius: 5px;
+    padding: 8px 10px;
+    background: transparent;
+    color: #fff;
+  }
+
+  .mobileNav {
+    display: grid;
+    gap: 6px;
+    padding: 12px 14px;
+    background: #fff;
+    border-bottom: 1px solid #eee4dc;
+  }
+
+  .mobileNav label {
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .mobileNav select {
+    min-height: 42px;
+    border: 1px solid #d8c7ba;
+    border-radius: 5px;
+    padding: 8px;
+    background: #fff;
+  }
+}

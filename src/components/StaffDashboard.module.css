@@ -5,6 +5,11 @@
   color: #3f3029;
 }
 
+.page.embedded {
+  min-height: calc(100vh - 64px);
+  padding-top: 32px;
+}
+
 .heading {
   display: flex;
   align-items: flex-end;
@@ -318,6 +323,65 @@
   font-size: 13px;
 }
 
+.catalogAdmin {
+  overflow: hidden;
+  border: 1px solid #eee4dc;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.catalogAdminHeading {
+  padding: 20px;
+  border-bottom: 1px solid #eee4dc;
+}
+
+.catalogAdminHeading h2 {
+  margin: 0 0 5px;
+  color: #531718;
+}
+
+.catalogAdminHeading p {
+  margin: 0;
+  color: #665b56;
+  font-size: 13px;
+}
+
+.catalogItem {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 130px 100px;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 20px;
+  border-bottom: 1px solid #eee4dc;
+}
+
+.catalogItem:last-child {
+  border-bottom: 0;
+}
+
+.catalogItem > span:first-child {
+  display: grid;
+  gap: 3px;
+}
+
+.catalogItem small {
+  color: #665b56;
+}
+
+.available,
+.unavailable {
+  text-align: right;
+  font-size: 12px;
+}
+
+.available {
+  color: #28633b;
+}
+
+.unavailable {
+  color: #9a332e;
+}
+
 @media (max-width: 560px) {
   .page {
     padding: 32px 14px 48px;
@@ -339,5 +403,19 @@
 
   .accountActions {
     justify-content: flex-start;
+  }
+
+  .page.embedded {
+    padding-top: 24px;
+  }
+
+  .catalogItem {
+    grid-template-columns: minmax(0, 1fr) auto;
+    padding: 12px 14px;
+  }
+
+  .catalogItem strong:last-child {
+    grid-column: 1 / -1;
+    text-align: left;
   }
 }

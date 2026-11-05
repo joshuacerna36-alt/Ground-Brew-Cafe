@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import styles from './StaffDashboard.module.css'
+import { orderCatalog } from '../menuCatalog.js'
 
 const currency = (cents) => new Intl.NumberFormat('en-PH', {
   style: 'currency',
@@ -39,7 +40,7 @@ const getNextStatuses = (order) => {
   return nextStatuses[order.status] || []
 }
 
-function StaffDashboard({ user }) {
+function StaffDashboard({ user, section = 'Orders', embedded = false }) {
   const [orders, setOrders] = useState([])
   const [users, setUsers] = useState([])
   const [loading, setLoading] = useState(true)
@@ -50,11 +51,17 @@ function StaffDashboard({ user }) {
     setLoading(true)
     setError('')
     try {
-      const orderResponse = await fetch('/api/staff/orders')
-      const orderResult = await orderResponse.json()
-      if (!orderResponse.ok) throw new Error(orderResult.error || 'Could not load orders.')
-      setOrders(orderResult.orders)
-      if (user.role === 'admin') {
+      const manageUsers = ['Users', 'Accounts', 'Access roles'].includes(section)
+      const manageOrders = ['Orders', 'Payments'].includes(section) || !embedded
+      if (manageOrders) {
+        const orderResponse = await fetch('/api/staff/orders')
+        const orderResult = await orderResponse.json()
+        if (!orderResponse.ok) throw new Error(orderResult.error || 'Could not load orders.')
+        setOrders(orderResult.orders)
+      } else {
+        setOrders([])
+      }
+      if (user.role === 'admin' && (manageUsers || !embedded)) {
         const usersResponse = await fetch('/api/staff/users')
         const usersResult = await usersResponse.json()
         if (!usersResponse.ok) throw new Error(usersResult.error || 'Could not load accounts.')
@@ -67,7 +74,7 @@ function StaffDashboard({ user }) {
     } finally {
       setLoading(false)
     }
-  }, [user.role])
+  }, [user.role, section, embedded])
 
   useEffect(() => {
     loadDashboard()
@@ -129,13 +136,17 @@ function StaffDashboard({ user }) {
     }
   }
 
+  const showMenu = embedded && ['Menu catalog', 'Availability'].includes(section)
+  const showOrders = !embedded || ['Orders', 'Payments'].includes(section)
+  const showUsers = !embedded || ['Users', 'Accounts', 'Access roles'].includes(section)
+
   return (
-    <main className={styles.page}>
+    <main className={`${styles.page}${embedded ? ` ${styles.embedded}` : ''}`}>
       <header className={styles.heading}>
         <div>
           <p className={styles.eyebrow}>Grounded Brew Café</p>
-          <h1>Staff Dashboard</h1>
-          <p>Welcome, {user.name}. Review scheduled orders and update their progress.</p>
+          <h1>{embedded ? section : 'Staff Dashboard'}</h1>
+          <p>Welcome, {user.name}. {embedded ? 'Manage this administration module.' : 'Review scheduled orders and update their progress.'}</p>
         </div>
         <button type="button" className={styles.refresh} onClick={loadDashboard} disabled={loading}>
           {loading ? 'Refreshing…' : 'Refresh dashboard'}
@@ -143,11 +154,27 @@ function StaffDashboard({ user }) {
       </header>
 
       {error && <p className={styles.error} role="alert">{error}</p>}
-      {loading ? (
+      {showMenu ? (
+        <section className={styles.catalogAdmin} aria-label="Menu and inventory">
+          <div className={styles.catalogAdminHeading}>
+            <h2>{section === 'Availability' ? 'Availability' : 'Menu catalog'}</h2>
+            <p>Current items and availability values from the café catalog.</p>
+          </div>
+          {[...orderCatalog.entries()].map(([id, item]) => (
+            <div className={styles.catalogItem} key={id}>
+              <span><strong>{item.name}</strong><small>Catalog #{id}</small></span>
+              <span>{(item.priceCents / 100).toLocaleString('en-PH', { style: 'currency', currency: 'PHP' })}</span>
+              <strong className={item.soldOut ? styles.unavailable : styles.available}>
+                {item.soldOut ? 'Unavailable' : 'Available'}
+              </strong>
+            </div>
+          ))}
+        </section>
+      ) : showOrders && loading ? (
         <p className={styles.empty}>Loading dashboard…</p>
-      ) : orders.length === 0 ? (
+      ) : showOrders && orders.length === 0 ? (
         <p className={styles.empty}>No orders have been placed yet.</p>
-      ) : (
+      ) : showOrders ? (
         <section className={styles.orderList} aria-label="Customer orders">
           {orders.map((order) => (
             <article className={styles.orderCard} key={order.id}>
@@ -220,9 +247,9 @@ function StaffDashboard({ user }) {
             </article>
           ))}
         </section>
-      )}
+      ) : null}
 
-      {user.role === 'admin' && (
+      {user.role === 'admin' && showUsers && (
         <section className={styles.accounts}>
           <h2>Customer and staff access</h2>
           <p>Manage roles and account access. Deactivated accounts cannot sign in; deleted accounts lose contact details while order records are retained.</p>

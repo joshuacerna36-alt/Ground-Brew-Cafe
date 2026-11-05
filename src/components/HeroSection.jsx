@@ -350,7 +350,14 @@ const HeroSection = () => {
           password: authPassword
         })
       })
-      const result = await response.json()
+      const contentType = response.headers.get('content-type') || ''
+      let result = {}
+      if (contentType.includes('application/json')) {
+        result = await response.json()
+      } else {
+        const text = await response.text()
+        throw new Error(text.trim() || 'Account service is unavailable. Please try again later.')
+      }
       if (!response.ok) throw new Error(result.error || 'Unable to sign in. Please try again.')
       setAuthUser(result.user)
       setAuthUnavailable(false)
@@ -359,6 +366,14 @@ const HeroSection = () => {
       setAuthEmail('')
       setAuthPassword('')
       setShowPassword(false)
+      if (result.user.role === 'admin') {
+        window.location.replace('/admin')
+        return
+      }
+      if (result.user.role === 'staff') {
+        window.location.replace('/staff')
+        return
+      }
       if (pendingItem) {
         setCart((currentCart) => [...currentCart, { ...pendingItem, cartId: Date.now() + Math.random() }])
       }
