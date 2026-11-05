@@ -30,6 +30,7 @@ const deliveryBasePhp = parseRate(process.env.DELIVERY_BASE_PHP, 100)
 const deliveryIncludedKm = parseRate(process.env.DELIVERY_INCLUDED_KM, 5)
 const deliveryPerKmPhp = parseRate(process.env.DELIVERY_PER_KM_PHP, 100)
 const maxOrderItems = 30
+const allowedOrigin = (process.env.CORS_ALLOWED_ORIGIN || '').trim().replace(/\/$/, '')
 
 function parseRate(value, fallback) {
   if (value === undefined || value === '') return fallback
@@ -155,17 +156,19 @@ function sendJson(response, status, value, extraHeaders = {}) {
 
 function setSessionCookie(response, token, maxAge = sessionDuration) {
   const secure = production ? '; Secure' : ''
+  const sameSite = allowedOrigin && secure ? '; SameSite=None' : '; SameSite=Strict'
   response.setHeader(
     'Set-Cookie',
-    `${sessionCookie}=${token}; Path=/; HttpOnly; SameSite=Strict; Max-Age=${maxAge}${secure}`
+    `${sessionCookie}=${token}; Path=/; HttpOnly${sameSite}; Max-Age=${maxAge}${secure}`
   )
 }
 
 function clearSessionCookie(response) {
   const secure = production ? '; Secure' : ''
+  const sameSite = allowedOrigin && secure ? '; SameSite=None' : '; SameSite=Strict'
   response.setHeader(
     'Set-Cookie',
-    `${sessionCookie}=; Path=/; HttpOnly; SameSite=Strict; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT${secure}`
+    `${sessionCookie}=; Path=/; HttpOnly${sameSite}; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT${secure}`
   )
 }
 
@@ -209,6 +212,7 @@ async function readJsonBody(request) {
 function isSameOrigin(request) {
   const origin = request.headers.origin
   if (!origin) return true
+  if (allowedOrigin && origin.replace(/\/$/, '') === allowedOrigin) return true
   try {
     return new URL(origin).host === request.headers.host
   } catch {
@@ -833,6 +837,18 @@ async function start() {
   })
   const server = createHttpServer(async (request, response) => {
     try {
+      const origin = request.headers.origin
+      if (allowedOrigin && origin?.replace(/\/$/, '') === allowedOrigin) {
+        response.setHeader('Access-Control-Allow-Origin', origin)
+        response.setHeader('Access-Control-Allow-Credentials', 'true')
+        response.setHeader('Vary', 'Origin')
+        response.setHeader('Access-Control-Allow-Headers', 'Content-Type')
+        response.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE, OPTIONS')
+      }
+      if (request.method === 'OPTIONS' && origin?.replace(/\/$/, '') === allowedOrigin) {
+        response.writeHead(204).end()
+        return
+      }
       const pathname = new URL(request.url, 'http://localhost').pathname
       if (pathname.startsWith('/api/')) {
         if (pathname.startsWith('/api/auth/')) {

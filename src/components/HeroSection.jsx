@@ -356,7 +356,12 @@ const HeroSection = () => {
         result = await response.json()
       } else {
         const text = await response.text()
-        throw new Error(text.trim() || 'Account service is unavailable. Please try again later.')
+        const looksLikeHtml = /^\s*(<!doctype|<html)/i.test(text)
+        throw new Error(
+          looksLikeHtml
+            ? 'The account server is unavailable or the site is not connected to the Node.js backend.'
+            : (text.trim() || 'Account service is unavailable. Please try again later.')
+        )
       }
       if (!response.ok) throw new Error(result.error || 'Unable to sign in. Please try again.')
       setAuthUser(result.user)
