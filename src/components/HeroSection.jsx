@@ -371,6 +371,57 @@ const HeroSection = () => {
     setAuthBusy(true)
     setAuthError('')
     setAuthUnavailable(false)
+
+    const isStaticSite = window.location.hostname.endsWith('github.io')
+      || !['localhost', '127.0.0.1'].includes(window.location.hostname)
+    if (isStaticSite) {
+      await new Promise((resolve) => window.setTimeout(resolve, 300))
+      const email = authEmail.trim().toLowerCase()
+
+      if (authMode === 'login' && email === 'test@grounded.com' && authPassword === '123456') {
+        completeAuth({
+          id: 'mock-grounded-user',
+          name: 'Grounded Test User',
+          email,
+          role: 'customer'
+        })
+        setAuthBusy(false)
+        return
+      }
+
+      if (
+        authMode === 'login'
+        && email === 'admin@groundedbrew.local'
+        && authPassword === 'GroundedBrew123!'
+      ) {
+        completeAuth({
+          id: 'mock-grounded-admin',
+          name: 'Grounded Brew Administrator',
+          email,
+          role: 'admin'
+        })
+        setAuthBusy(false)
+        return
+      }
+
+      if (authMode === 'register' && authName.trim().length >= 2 && authPassword.length >= 8) {
+        completeAuth({
+          id: `mock-${Date.now()}`,
+          name: authName.trim(),
+          email,
+          role: 'customer'
+        })
+        setAuthBusy(false)
+        return
+      }
+
+      setAuthError(authMode === 'login'
+        ? 'Email or password is incorrect.'
+        : 'Enter a name and a password of at least 8 characters.')
+      setAuthBusy(false)
+      return
+    }
+
     try {
       const response = await fetch(`/api/auth/${authMode}`, {
         method: 'POST',

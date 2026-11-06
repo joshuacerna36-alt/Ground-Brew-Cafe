@@ -13,7 +13,14 @@ function App() {
     }
   })
   const pathname = window.location.pathname
-  const route = window.location.hash.replace(/^#/, '') || pathname
+  const [routeHash, setRouteHash] = useState(window.location.hash)
+  const route = routeHash.replace(/^#/, '') || pathname
+
+  useEffect(() => {
+    const updateRoute = () => setRouteHash(window.location.hash)
+    window.addEventListener('hashchange', updateRoute)
+    return () => window.removeEventListener('hashchange', updateRoute)
+  }, [])
 
   useEffect(() => {
     let active = true
