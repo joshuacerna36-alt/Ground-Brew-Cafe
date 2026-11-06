@@ -1231,6 +1231,7 @@
 }
 
 .authError {
+  margin: 0;
   border-left: 3px solid #ffc1a8;
   padding: 8px 10px;
   background: rgba(76, 13, 9, .55);
