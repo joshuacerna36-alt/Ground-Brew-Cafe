@@ -165,6 +165,7 @@ const ContactIcon = ({ type }) => {
 
 const HeroSection = ({ customerDashboard = false }) => {
   const [activePage, setActivePage] = useState(customerDashboard ? 'Dashboard' : 'Home')
+  const [customerWelcome, setCustomerWelcome] = useState('Welcome!')
   const [activeFeature, setActiveFeature] = useState(categories[0])
   const [cart, setCart] = useState([])
   const [showCart, setShowCart] = useState(false)
@@ -207,7 +208,23 @@ const HeroSection = ({ customerDashboard = false }) => {
         return response.json()
       })
       .then(({ user }) => {
-        if (active) setAuthUser(user)
+        if (active) {
+          setAuthUser(user)
+          if (user?.role === 'customer') {
+            const seenKey = 'grounded_seen_customers'
+            let seenCustomers = []
+            try {
+              seenCustomers = JSON.parse(window.localStorage.getItem(seenKey) || '[]')
+            } catch {
+              seenCustomers = []
+            }
+            const customerKey = user.email || user.id
+            setCustomerWelcome(seenCustomers.includes(customerKey) ? 'Welcome Back!' : 'Welcome!')
+            if (!seenCustomers.includes(customerKey)) {
+              window.localStorage.setItem(seenKey, JSON.stringify([...seenCustomers, customerKey]))
+            }
+          }
+        }
       })
       .catch(() => {
         if (active) setAuthUnavailable(false)
@@ -360,6 +377,20 @@ const HeroSection = ({ customerDashboard = false }) => {
   }
 
   const completeAuth = (user) => {
+    if (user.role === 'customer') {
+      const seenKey = 'grounded_seen_customers'
+      let seenCustomers = []
+      try {
+        seenCustomers = JSON.parse(window.localStorage.getItem(seenKey) || '[]')
+      } catch {
+        seenCustomers = []
+      }
+      const customerKey = user.email || user.id
+      setCustomerWelcome(seenCustomers.includes(customerKey) ? 'Welcome Back!' : 'Welcome!')
+      if (!seenCustomers.includes(customerKey)) {
+        window.localStorage.setItem(seenKey, JSON.stringify([...seenCustomers, customerKey]))
+      }
+    }
     setAuthUser(user)
     notifyAuthChange(user)
     setAuthUnavailable(false)
@@ -429,6 +460,7 @@ const HeroSection = ({ customerDashboard = false }) => {
       notifyAuthChange(null)
       setCart([])
       setActivePage('Home')
+      window.location.replace(import.meta.env.BASE_URL)
     } catch (error) {
       setAuthError(error.message || 'Could not sign out. Please try again.')
       setShowAuth(true)
@@ -499,7 +531,7 @@ const HeroSection = ({ customerDashboard = false }) => {
           <nav className={styles.navLinks} aria-label="Main navigation">
             {[
               ...(customerDashboard ? [
-                { label: 'Dashboard', page: 'Dashboard' },
+                { label: 'Menu', page: 'Dashboard' },
                 { label: 'Order Online', page: 'Order Online' }
               ] : [
                 { label: 'Home', page: 'Home' },
@@ -554,8 +586,8 @@ const HeroSection = ({ customerDashboard = false }) => {
       {activePage === 'Dashboard' && customerDashboard && (
         <main className={styles.customerDashboard}>
           <section className={styles.customerWelcome}>
-            <p className={styles.eyebrow}>Customer dashboard</p>
-            <h1>Welcome, {authUser?.name || 'Grounded Brew customer'}</h1>
+            <p className={styles.eyebrow}>Customer Menu</p>
+            <h1>{customerWelcome}{customerWelcome === 'Welcome!' ? `, ${authUser?.name || 'Grounded Brew customer'}` : ''}</h1>
             <p>Discover featured drinks, browse best sellers, or review your recent orders.</p>
             <div className={styles.customerActions}>
               <button className={styles.customerPrimaryAction} onClick={() => setActivePage('Order Online')}>Order now</button>
