@@ -20,11 +20,19 @@ function AdminDashboard({ user }) {
 
   const logout = async () => {
     try {
+<<<<<<< HEAD
       await apiFetch('/api/auth/logout', { method: 'POST' })
     } catch {
       // signing out locally below is still the right outcome
     }
     notifyAuthChange(null)
+=======
+      await fetch('/api/auth/logout', { method: 'POST' })
+    } catch {
+      // Static GitHub Pages deployments have no logout API.
+    }
+    window.localStorage.removeItem('grounded_mock_user')
+>>>>>>> de01c24adbc88fcceb112891a358ede3cd8a5f28
     window.location.replace(import.meta.env.BASE_URL)
   }
 

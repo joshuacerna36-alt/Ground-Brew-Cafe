@@ -6,11 +6,15 @@ import { apiFetch, onAuthChange } from './api'
 
 const getRoute = () => window.location.hash.replace(/^#\/?/, '') || window.location.pathname
 
+const isStaticSite = () => window.location.hostname.endsWith('github.io')
+  || !['localhost', '127.0.0.1'].includes(window.location.hostname)
+
 function App() {
   // undefined = still checking, null = signed out, object = signed in
   const [authUser, setAuthUser] = useState(undefined)
   const [route, setRoute] = useState(getRoute)
   const pathname = window.location.pathname
+<<<<<<< HEAD
 
   useEffect(() => {
     const updateRoute = () => setRoute(getRoute())
@@ -24,6 +28,21 @@ function App() {
   useEffect(() => {
     let active = true
     apiFetch('/api/auth/me')
+=======
+  const [routeHash, setRouteHash] = useState(window.location.hash)
+  const route = routeHash.replace(/^#/, '') || pathname
+
+  useEffect(() => {
+    const updateRoute = () => setRouteHash(window.location.hash)
+    window.addEventListener('hashchange', updateRoute)
+    return () => window.removeEventListener('hashchange', updateRoute)
+  }, [])
+
+  useEffect(() => {
+    let active = true
+    if (isStaticSite()) return () => { active = false }
+    fetch('/api/auth/me')
+>>>>>>> de01c24adbc88fcceb112891a358ede3cd8a5f28
       .then((response) => response.ok ? response.json() : Promise.reject(new Error('Could not check session')))
       .then(({ user }) => {
         if (!active) return
