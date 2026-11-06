@@ -353,11 +353,11 @@ const HeroSection = () => {
     setAuthPassword('')
     setShowPassword(false)
     if (user.role === 'admin') {
-      window.location.replace('/admin')
+      window.location.replace(`${import.meta.env.BASE_URL}#admin`)
       return
     }
     if (user.role === 'staff') {
-      window.location.replace('/staff')
+      window.location.replace(`${import.meta.env.BASE_URL}#staff`)
       return
     }
     if (pendingItem) {
@@ -409,6 +409,20 @@ const HeroSection = () => {
             name: 'Grounded Test User',
             email,
             role: 'customer'
+          })
+          return
+        }
+
+        if (
+          authMode === 'login'
+          && email === 'admin@groundedbrew.local'
+          && authPassword === 'GroundedBrew123!'
+        ) {
+          completeAuth({
+            id: 'mock-grounded-admin',
+            name: 'Grounded Brew Administrator',
+            email,
+            role: 'admin'
           })
           return
         }
