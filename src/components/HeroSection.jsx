@@ -302,17 +302,11 @@ const HeroSection = () => {
     setCheckoutBusy(true)
     setCheckoutError('')
     try {
-      const sessionResponse = await apiFetch('/api/auth/me')
-      const sessionResult = await sessionResponse.json()
-      const sessionUser = sessionResponse.ok ? sessionResult.user : null
-      if (!sessionUser) {
-        setAuthUser(null)
-        notifyAuthChange(null)
+      if (!authUser) {
         setShowCheckout(false)
         openAuth()
         return
       }
-      if (!authUser || sessionUser.id !== authUser.id) setAuthUser(sessionUser)
       const quantities = new Map()
       for (const item of cart) quantities.set(item.id, (quantities.get(item.id) || 0) + 1)
       const items = [...quantities].map(([id, quantity]) => ({ id, quantity }))
