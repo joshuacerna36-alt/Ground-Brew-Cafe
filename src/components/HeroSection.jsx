@@ -164,7 +164,7 @@ const ContactIcon = ({ type }) => {
 }
 
 const HeroSection = ({ customerDashboard = false }) => {
-  const [activePage, setActivePage] = useState(customerDashboard ? 'Order Online' : 'Home')
+  const [activePage, setActivePage] = useState(customerDashboard ? 'Dashboard' : 'Home')
   const [activeFeature, setActiveFeature] = useState(categories[0])
   const [cart, setCart] = useState([])
   const [showCart, setShowCart] = useState(false)
@@ -443,6 +443,10 @@ const HeroSection = ({ customerDashboard = false }) => {
     openAuth()
   }
 
+  const allMenuItems = Object.values(menuData).flat()
+  const featuredItems = allMenuItems.filter((item) => [103, 105, 203, 207, 301].includes(item.id))
+  const bestSellerItems = allMenuItems.filter((item) => [103, 105, 203, 204, 301].includes(item.id))
+
   const renderCatalog = (withOrdering) => (
     <div className={styles.catalog}>
       {categories.map((category) => (
@@ -488,21 +492,26 @@ const HeroSection = ({ customerDashboard = false }) => {
 
       <header className={styles.header}>
         <div className={styles.navContainer}>
-          <button className={styles.logo} onClick={() => setActivePage('Home')} aria-label="Grounded Brew Café home">
+          <button className={styles.logo} onClick={() => setActivePage(customerDashboard ? 'Dashboard' : 'Home')} aria-label="Grounded Brew Café home">
             <img src={logo} alt="" />
             <span>Grounded Brew Café</span>
           </button>
           <nav className={styles.navLinks} aria-label="Main navigation">
             {[
-              ...(!customerDashboard ? [
+              ...(customerDashboard ? [
+                { label: 'Dashboard', page: 'Dashboard' },
+                { label: 'Order Online', page: 'Order Online' }
+              ] : [
                 { label: 'Home', page: 'Home' },
                 { label: 'Menu', page: 'Menu' }
-              ] : []),
-              { label: 'Order Online', page: 'Order Online' },
-              ...(!customerDashboard ? [
+              ]),
+              ...(customerDashboard ? [
                 { label: 'About', page: 'About' },
                 { label: 'Contact', page: 'Contact' }
-              ] : [])
+              ] : [
+                { label: 'About', page: 'About' },
+                { label: 'Contact', page: 'Contact' }
+              ])
             ].map(({ label, page }) => (
               <button
                 key={label}
@@ -541,6 +550,67 @@ const HeroSection = ({ customerDashboard = false }) => {
           </div>
         </div>
       </header>
+
+      {activePage === 'Dashboard' && customerDashboard && (
+        <main className={styles.customerDashboard}>
+          <section className={styles.customerWelcome}>
+            <p className={styles.eyebrow}>Customer dashboard</p>
+            <h1>Welcome, {authUser?.name || 'Grounded Brew customer'}</h1>
+            <p>Discover featured drinks, browse best sellers, or review your recent orders.</p>
+            <div className={styles.customerActions}>
+              <button className={styles.customerPrimaryAction} onClick={() => setActivePage('Order Online')}>Order now</button>
+              <button className={styles.customerSecondaryAction} onClick={() => setActivePage('My Orders')}>View my orders</button>
+            </div>
+          </section>
+
+          <section className={styles.customerMenuSection} aria-labelledby="featured-menu-title">
+            <div className={styles.customerSectionHeading}>
+              <div>
+                <p className={styles.eyebrow}>Handpicked for you</p>
+                <h2 id="featured-menu-title">Feature Menu</h2>
+              </div>
+              <button className={styles.customerTextAction} onClick={() => setActivePage('Order Online')}>Browse all menu →</button>
+            </div>
+            <div className={styles.customerProductGrid}>
+              {featuredItems.map((item) => (
+                <article className={styles.customerProductCard} key={item.id}>
+                  <button className={styles.customerProductButton} type="button" onClick={() => !item.soldOut && addToCart(item)} disabled={item.soldOut}>
+                    <img src={asset(item.image)} alt="" loading="lazy" />
+                    <div>
+                      <h3>{item.name}</h3>
+                      <strong>{item.priceDisplay}</strong>
+                      {item.soldOut && <span className={styles.soldOut}>Unavailable</span>}
+                    </div>
+                  </button>
+                </article>
+              ))}
+            </div>
+          </section>
+
+          <section className={styles.customerMenuSection} aria-labelledby="best-sellers-title">
+            <div className={styles.customerSectionHeading}>
+              <div>
+                <p className={styles.eyebrow}>Customer favorites</p>
+                <h2 id="best-sellers-title">Best Seller</h2>
+              </div>
+            </div>
+            <div className={styles.customerProductGrid}>
+              {bestSellerItems.map((item) => (
+                <article className={styles.customerProductCard} key={item.id}>
+                  <button className={styles.customerProductButton} type="button" onClick={() => !item.soldOut && addToCart(item)} disabled={item.soldOut}>
+                    <img src={asset(item.image)} alt="" loading="lazy" />
+                    <div>
+                      <h3>{item.name}</h3>
+                      <strong>{item.priceDisplay}</strong>
+                      {item.soldOut && <span className={styles.soldOut}>Unavailable</span>}
+                    </div>
+                  </button>
+                </article>
+              ))}
+            </div>
+          </section>
+        </main>
+      )}
 
       {activePage === 'Home' && (
         <main>
