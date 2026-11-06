@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import StaffDashboard from './StaffDashboard'
 import styles from './AdminDashboard.module.css'
+import { apiFetch, notifyAuthChange } from '../api'
 
 const menu = [
   { label: 'Transactions', items: ['Orders', 'Payments'] },
@@ -18,8 +19,13 @@ function AdminDashboard({ user }) {
   }
 
   const logout = async () => {
-    await fetch('/api/auth/logout', { method: 'POST' })
-    window.location.replace('/')
+    try {
+      await apiFetch('/api/auth/logout', { method: 'POST' })
+    } catch {
+      // signing out locally below is still the right outcome
+    }
+    notifyAuthChange(null)
+    window.location.replace(import.meta.env.BASE_URL)
   }
 
   return (

@@ -32,6 +32,10 @@ jobs:
       - name: Build site
         env:
           GITHUB_PAGES: 'true'
+          # GitHub Pages has no Node.js server, so accounts/orders use the
+          # in-browser service in src/localApi.js. Remove this line and set
+          # VITE_API_BASE_URL instead once server.js is hosted somewhere.
+          VITE_API_MODE: local
         run: npm run build
       - name: Upload GitHub Pages artifact
         uses: actions/upload-pages-artifact@v3

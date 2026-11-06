@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import styles from './HeroSection.module.css'
 import StaffDashboard from './StaffDashboard'
+import { apiFetch, notifyAuthChange, onAuthChange } from '../api'
 
 const php = (value) => `₱${value.toFixed(2)}`
 const asset = (path) => {
@@ -169,14 +170,7 @@ const HeroSection = () => {
   const [customerOrders, setCustomerOrders] = useState([])
   const [customerOrdersError, setCustomerOrdersError] = useState('')
   const [customerOrdersBusy, setCustomerOrdersBusy] = useState(false)
-  const [authUser, setAuthUser] = useState(() => {
-    try {
-      const storedUser = window.localStorage.getItem('grounded_mock_user')
-      return storedUser ? JSON.parse(storedUser) : null
-    } catch {
-      return null
-    }
-  })
+  const [authUser, setAuthUser] = useState(null)
   const [showAuth, setShowAuth] = useState(false)
   const [authMode, setAuthMode] = useState('login')
   const [authName, setAuthName] = useState('')
@@ -188,9 +182,11 @@ const HeroSection = () => {
   const [pendingItem, setPendingItem] = useState(null)
   const [authUnavailable, setAuthUnavailable] = useState(false)
 
+  useEffect(() => onAuthChange((user) => setAuthUser(user)), [])
+
   useEffect(() => {
     let active = true
-    fetch('/api/auth/me')
+    apiFetch('/api/auth/me')
       .then(async (response) => {
         if (!response.ok) throw new Error('Could not check your sign-in status.')
         return response.json()
@@ -206,7 +202,7 @@ const HeroSection = () => {
 
   useEffect(() => {
     let active = true
-    fetch('/api/config')
+    apiFetch('/api/config')
       .then(async (response) => {
         const result = await response.json()
         if (!response.ok) throw new Error(result.error || 'Could not load checkout settings.')
@@ -226,7 +222,7 @@ const HeroSection = () => {
     let active = true
     setCustomerOrdersBusy(true)
     setCustomerOrdersError('')
-    fetch('/api/orders')
+    apiFetch('/api/orders')
       .then(async (response) => {
         const result = await response.json()
         if (!response.ok) throw new Error(result.error || 'Could not load your orders.')
@@ -285,7 +281,7 @@ const HeroSection = () => {
     setQuoteBusy(true)
     setCheckoutError('')
     try {
-      const response = await fetch('/api/delivery/quote', {
+      const response = await apiFetch('/api/delivery/quote', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ address: deliveryAddress })
@@ -309,7 +305,7 @@ const HeroSection = () => {
       const quantities = new Map()
       for (const item of cart) quantities.set(item.id, (quantities.get(item.id) || 0) + 1)
       const items = [...quantities].map(([id, quantity]) => ({ id, quantity }))
-      const response = await fetch('/api/orders', {
+      const response = await apiFetch('/api/orders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -345,7 +341,7 @@ const HeroSection = () => {
 
   const completeAuth = (user) => {
     setAuthUser(user)
-    window.localStorage.setItem('grounded_mock_user', JSON.stringify(user))
+    notifyAuthChange(user)
     setAuthUnavailable(false)
     setShowAuth(false)
     setAuthName('')
@@ -372,7 +368,7 @@ const HeroSection = () => {
     setAuthError('')
     setAuthUnavailable(false)
     try {
-      const response = await fetch(`/api/auth/${authMode}`, {
+      const response = await apiFetch(`/api/auth/${authMode}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -382,67 +378,19 @@ const HeroSection = () => {
         })
       })
       const contentType = response.headers.get('content-type') || ''
-      let result = {}
-      if (contentType.includes('application/json')) {
-        result = await response.json()
-      } else {
-        const text = await response.text()
-        const looksLikeHtml = /^\s*(<!doctype|<html)/i.test(text)
-        throw new Error(
-          looksLikeHtml
-            ? 'The account server is unavailable or the site is not connected to the Node.js backend.'
-            : (text.trim() || 'Account service is unavailable. Please try again later.')
-        )
+      if (!contentType.includes('application/json')) {
+        throw new Error('The account service returned an unexpected response. Please try again later.')
       }
+      const result = await response.json()
       if (!response.ok) throw new Error(result.error || 'Unable to sign in. Please try again.')
       completeAuth(result.user)
     } catch (error) {
-      const isNetworkFailure = error instanceof TypeError
-        || /fetch|network|failed to connect|account server is unavailable/i.test(error.message || '')
-      if (isNetworkFailure) {
-        await new Promise((resolve) => window.setTimeout(resolve, 300))
-        const email = authEmail.trim().toLowerCase()
-
-        if (authMode === 'login' && email === 'test@grounded.com' && authPassword === '123456') {
-          completeAuth({
-            id: 'mock-grounded-user',
-            name: 'Grounded Test User',
-            email,
-            role: 'customer'
-          })
-          return
-        }
-
-        if (
-          authMode === 'login'
-          && email === 'admin@groundedbrew.local'
-          && authPassword === 'GroundedBrew123!'
-        ) {
-          completeAuth({
-            id: 'mock-grounded-admin',
-            name: 'Grounded Brew Administrator',
-            email,
-            role: 'admin'
-          })
-          return
-        }
-
-        if (authMode === 'register' && authName.trim().length >= 2 && authPassword.length >= 6) {
-          const user = {
-            id: `mock-${Date.now()}`,
-            name: authName.trim(),
-            email,
-            role: 'customer'
-          }
-          completeAuth(user)
-          return
-        }
-
+      if (error instanceof TypeError) {
         setAuthUnavailable(true)
-        setAuthError(isNetworkFailure ? 'Account service is unavailable. Please try again later.' : '')
-        return
+        setAuthError('Account service is unavailable. Please try again later.')
+      } else {
+        setAuthError(error.message || 'Unable to complete authentication. Please try again.')
       }
-      setAuthError(error.message || 'Unable to complete authentication. Please try again.')
     } finally {
       setAuthBusy(false)
     }
@@ -450,10 +398,10 @@ const HeroSection = () => {
 
   const handleLogout = async () => {
     try {
-      const response = await fetch('/api/auth/logout', { method: 'POST' })
+      const response = await apiFetch('/api/auth/logout', { method: 'POST' })
       if (!response.ok) throw new Error('Could not sign out.')
-      window.localStorage.removeItem('grounded_mock_user')
       setAuthUser(null)
+      notifyAuthChange(null)
       setCart([])
       setActivePage('Home')
     } catch (error) {

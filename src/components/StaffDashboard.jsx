@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import styles from './StaffDashboard.module.css'
 import { orderCatalog } from '../menuCatalog.js'
+import { apiFetch } from '../api'
 
 const currency = (cents) => new Intl.NumberFormat('en-PH', {
   style: 'currency',
@@ -54,7 +55,7 @@ function StaffDashboard({ user, section = 'Orders', embedded = false }) {
       const manageUsers = ['Users', 'Accounts', 'Access roles'].includes(section)
       const manageOrders = ['Orders', 'Payments'].includes(section) || !embedded
       if (manageOrders) {
-        const orderResponse = await fetch('/api/staff/orders')
+        const orderResponse = await apiFetch('/api/staff/orders')
         const orderResult = await orderResponse.json()
         if (!orderResponse.ok) throw new Error(orderResult.error || 'Could not load orders.')
         setOrders(orderResult.orders)
@@ -62,7 +63,7 @@ function StaffDashboard({ user, section = 'Orders', embedded = false }) {
         setOrders([])
       }
       if (user.role === 'admin' && (manageUsers || !embedded)) {
-        const usersResponse = await fetch('/api/staff/users')
+        const usersResponse = await apiFetch('/api/staff/users')
         const usersResult = await usersResponse.json()
         if (!usersResponse.ok) throw new Error(usersResult.error || 'Could not load accounts.')
         setUsers(usersResult.users)
@@ -84,7 +85,7 @@ function StaffDashboard({ user, section = 'Orders', embedded = false }) {
     setBusyId(order.id)
     setError('')
     try {
-      const response = await fetch(`/api/staff/orders/${encodeURIComponent(order.id)}`, {
+      const response = await apiFetch(`/api/staff/orders/${encodeURIComponent(order.id)}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(changes)
@@ -103,7 +104,7 @@ function StaffDashboard({ user, section = 'Orders', embedded = false }) {
     setBusyId(account.id)
     setError('')
     try {
-      const response = await fetch(`/api/staff/users/${encodeURIComponent(account.id)}`, {
+      const response = await apiFetch(`/api/staff/users/${encodeURIComponent(account.id)}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(changes)
@@ -124,7 +125,7 @@ function StaffDashboard({ user, section = 'Orders', embedded = false }) {
     setBusyId(account.id)
     setError('')
     try {
-      const response = await fetch(`/api/staff/users/${encodeURIComponent(account.id)}`, { method: 'DELETE' })
+      const response = await apiFetch(`/api/staff/users/${encodeURIComponent(account.id)}`, { method: 'DELETE' })
       const result = await response.json()
       if (!response.ok) throw new Error(result.error || 'Could not delete this account.')
       await loadDashboard()

@@ -32,7 +32,24 @@ The SQLite database is stored in `data/accounts.sqlite` by default. Set `DATABAS
 
 The `Deploy café site to GitHub Pages` workflow builds the Vite app and deploys the generated `dist` folder whenever changes are pushed to `main`. In the repository's **Settings → Pages**, select **GitHub Actions** as the build and deployment source. The Vite base path is configured for this project repository.
 
-GitHub Pages hosts only static files. It can display the café site and menu, but cannot run the Node.js server, database-backed registration/login, checkout, orders, delivery quotes, or staff dashboard. Those features require deploying `server.js` to a Node.js host with persistent storage and configuring the frontend to use that server.
+GitHub Pages hosts only static files, so it cannot run `server.js`. To keep the site fully usable there, the app includes a built-in **browser account service** (`src/localApi.js`). When no Node.js server is reachable, login, registration, checkout, My Orders, and the staff/admin dashboards all run inside the visitor's browser and store their data in that browser's `localStorage`. The Pages workflow sets `VITE_API_MODE=local` to enable this.
+
+Built-in logins on the GitHub Pages site:
+
+| Account | Email | Password |
+| --- | --- | --- |
+| Administrator | `admin@groundedbrew.local` | `GroundedBrew123!` |
+| Demo customer | `test@grounded.com` | `123456` |
+
+Anyone can also use **Register** to create their own customer account and log in with it later on the same browser. In the admin dashboard, **Users → Accounts** lets the administrator promote accounts to staff, deactivate/reactivate them, or delete them.
+
+Things to know about this browser-only mode:
+
+- Accounts and orders are saved per browser/device. They are **not shared** between devices, so an order placed on a customer's phone will not appear in an admin's browser on another computer.
+- Everything in a static site's JavaScript is visible to visitors, including the built-in admin password above. Treat it as a demo login. To change it, set `VITE_ADMIN_EMAIL` and `VITE_ADMIN_PASSWORD` in the workflow's build `env`.
+- Delivery quotes and GCash are unavailable (pickup + cash only), exactly as when the Node server has no Google Maps key.
+
+For real, shared accounts and orders, deploy `server.js` to a Node.js host with persistent storage, set `CORS_ALLOWED_ORIGIN` to your GitHub Pages URL on that server, then in the workflow replace `VITE_API_MODE: local` with `VITE_API_BASE_URL: https://your-server.example.com`. The site then uses the real server automatically.
 
 ## Orders, delivery, and payments
 

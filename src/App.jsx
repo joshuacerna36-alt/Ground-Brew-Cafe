@@ -2,31 +2,40 @@ import React, { useEffect, useState } from 'react'
 import HeroSection from './components/HeroSection'
 import AdminDashboard from './components/AdminDashboard'
 import StaffDashboard from './components/StaffDashboard'
+import { apiFetch, onAuthChange } from './api'
+
+const getRoute = () => window.location.hash.replace(/^#\/?/, '') || window.location.pathname
 
 function App() {
-  const [authUser, setAuthUser] = useState(() => {
-    try {
-      const storedUser = window.localStorage.getItem('grounded_mock_user')
-      return storedUser ? JSON.parse(storedUser) : undefined
-    } catch {
-      return undefined
-    }
-  })
+  // undefined = still checking, null = signed out, object = signed in
+  const [authUser, setAuthUser] = useState(undefined)
+  const [route, setRoute] = useState(getRoute)
   const pathname = window.location.pathname
-  const route = window.location.hash.replace(/^#/, '') || pathname
+
+  useEffect(() => {
+    const updateRoute = () => setRoute(getRoute())
+    window.addEventListener('hashchange', updateRoute)
+    return () => window.removeEventListener('hashchange', updateRoute)
+  }, [])
+
+  // Keep in step with sign-ins and sign-outs that happen in the login dialog or dashboards.
+  useEffect(() => onAuthChange((user) => setAuthUser(user)), [])
 
   useEffect(() => {
     let active = true
-    fetch('/api/auth/me')
+    apiFetch('/api/auth/me')
       .then((response) => response.ok ? response.json() : Promise.reject(new Error('Could not check session')))
       .then(({ user }) => {
         if (!active) return
         setAuthUser(user)
-        if (user?.role === 'admin' && pathname === '/') window.location.replace('#admin')
-        if (user?.role === 'staff' && pathname === '/') window.location.replace('#staff')
+        const atSiteRoot = pathname === '/' || pathname === import.meta.env.BASE_URL
+        if (atSiteRoot && !window.location.hash) {
+          if (user?.role === 'admin') window.location.replace('#admin')
+          if (user?.role === 'staff') window.location.replace('#staff')
+        }
       })
       .catch(() => {
-        if (active && authUser === undefined) setAuthUser(null)
+        if (active) setAuthUser((current) => current === undefined ? null : current)
       })
     return () => { active = false }
   }, [pathname])
