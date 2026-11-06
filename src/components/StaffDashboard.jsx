@@ -52,24 +52,6 @@ function StaffDashboard({ user, section = 'Orders', embedded = false }) {
     setLoading(true)
     setError('')
     try {
-      const staticSite = window.location.hostname.endsWith('github.io')
-        || !['localhost', '127.0.0.1'].includes(window.location.hostname)
-      if (staticSite) {
-        const storedOrders = JSON.parse(window.localStorage.getItem('grounded_mock_orders') || '[]')
-        const manageUsers = ['Users', 'Accounts', 'Access roles'].includes(section)
-        const manageOrders = ['Orders', 'Payments'].includes(section) || !embedded
-        setOrders(manageOrders ? storedOrders : [])
-        setUsers(manageUsers || !embedded
-          ? [{
-              id: 'mock-grounded-admin',
-              display_name: 'Grounded Brew Administrator',
-              email: 'admin@groundedbrew.local',
-              role: 'admin',
-              account_status: 'active'
-            }]
-          : [])
-        return
-      }
       const manageUsers = ['Users', 'Accounts', 'Access roles'].includes(section)
       const manageOrders = ['Orders', 'Payments'].includes(section) || !embedded
       if (manageOrders) {
