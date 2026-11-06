@@ -1787,6 +1787,7 @@
   height: 100%;
   min-height: 520px;
   object-fit: cover;
+  image-rendering: auto;
 }
 
 .itemModalClose {
