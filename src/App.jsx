@@ -3,6 +3,9 @@ import HeroSection from './components/HeroSection'
 import AdminDashboard from './components/AdminDashboard'
 import StaffDashboard from './components/StaffDashboard'
 
+const isStaticSite = () => window.location.hostname.endsWith('github.io')
+  || !['localhost', '127.0.0.1'].includes(window.location.hostname)
+
 function App() {
   const [authUser, setAuthUser] = useState(() => {
     try {
@@ -24,6 +27,7 @@ function App() {
 
   useEffect(() => {
     let active = true
+    if (isStaticSite()) return () => { active = false }
     fetch('/api/auth/me')
       .then((response) => response.ok ? response.json() : Promise.reject(new Error('Could not check session')))
       .then(({ user }) => {

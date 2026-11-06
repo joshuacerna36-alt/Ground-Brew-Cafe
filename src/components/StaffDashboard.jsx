@@ -51,6 +51,24 @@ function StaffDashboard({ user, section = 'Orders', embedded = false }) {
     setLoading(true)
     setError('')
     try {
+      const staticSite = window.location.hostname.endsWith('github.io')
+        || !['localhost', '127.0.0.1'].includes(window.location.hostname)
+      if (staticSite) {
+        const storedOrders = JSON.parse(window.localStorage.getItem('grounded_mock_orders') || '[]')
+        const manageUsers = ['Users', 'Accounts', 'Access roles'].includes(section)
+        const manageOrders = ['Orders', 'Payments'].includes(section) || !embedded
+        setOrders(manageOrders ? storedOrders : [])
+        setUsers(manageUsers || !embedded
+          ? [{
+              id: 'mock-grounded-admin',
+              display_name: 'Grounded Brew Administrator',
+              email: 'admin@groundedbrew.local',
+              role: 'admin',
+              account_status: 'active'
+            }]
+          : [])
+        return
+      }
       const manageUsers = ['Users', 'Accounts', 'Access roles'].includes(section)
       const manageOrders = ['Orders', 'Payments'].includes(section) || !embedded
       if (manageOrders) {
@@ -84,6 +102,14 @@ function StaffDashboard({ user, section = 'Orders', embedded = false }) {
     setBusyId(order.id)
     setError('')
     try {
+      const staticSite = window.location.hostname.endsWith('github.io')
+        || !['localhost', '127.0.0.1'].includes(window.location.hostname)
+      if (staticSite) {
+        const updatedOrders = orders.map((item) => item.id === order.id ? { ...item, ...changes } : item)
+        setOrders(updatedOrders)
+        window.localStorage.setItem('grounded_mock_orders', JSON.stringify(updatedOrders))
+        return
+      }
       const response = await fetch(`/api/staff/orders/${encodeURIComponent(order.id)}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -103,6 +129,14 @@ function StaffDashboard({ user, section = 'Orders', embedded = false }) {
     setBusyId(account.id)
     setError('')
     try {
+      const staticSite = window.location.hostname.endsWith('github.io')
+        || !['localhost', '127.0.0.1'].includes(window.location.hostname)
+      if (staticSite) {
+        setUsers((current) => current.map((item) => item.id === account.id
+          ? { ...item, ...changes, account_status: changes.active === false ? 'inactive' : changes.active === true ? 'active' : item.account_status }
+          : item))
+        return
+      }
       const response = await fetch(`/api/staff/users/${encodeURIComponent(account.id)}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -124,6 +158,12 @@ function StaffDashboard({ user, section = 'Orders', embedded = false }) {
     setBusyId(account.id)
     setError('')
     try {
+      const staticSite = window.location.hostname.endsWith('github.io')
+        || !['localhost', '127.0.0.1'].includes(window.location.hostname)
+      if (staticSite) {
+        setUsers((current) => current.filter((item) => item.id !== account.id))
+        return
+      }
       const response = await fetch(`/api/staff/users/${encodeURIComponent(account.id)}`, { method: 'DELETE' })
       const result = await response.json()
       if (!response.ok) throw new Error(result.error || 'Could not delete this account.')

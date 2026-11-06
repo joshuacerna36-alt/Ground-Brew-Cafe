@@ -18,8 +18,13 @@ function AdminDashboard({ user }) {
   }
 
   const logout = async () => {
-    await fetch('/api/auth/logout', { method: 'POST' })
-    window.location.replace('/')
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' })
+    } catch {
+      // Static GitHub Pages deployments have no logout API.
+    }
+    window.localStorage.removeItem('grounded_mock_user')
+    window.location.replace(import.meta.env.BASE_URL)
   }
 
   return (
