@@ -34,6 +34,7 @@ function App() {
         if (atSiteRoot && !window.location.hash) {
           if (user?.role === 'admin') window.location.replace('#admin')
           if (user?.role === 'staff') window.location.replace('#staff')
+          if (user?.role === 'customer') window.location.replace('#customer')
         }
       })
       .catch(() => {
@@ -56,7 +57,7 @@ function App() {
 
   return (
     <div>
-      <HeroSection />
+      <HeroSection customerDashboard={route === 'customer' || route === 'dashboard'} />
     </div>
   )
 }

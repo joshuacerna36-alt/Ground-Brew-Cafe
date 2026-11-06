@@ -368,6 +368,44 @@
   color: #665b56;
 }
 
+.catalogField {
+  display: grid;
+  gap: 6px;
+  color: #665b56;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.catalogField input {
+  min-height: 40px;
+  border: 1px solid #d8ccc4;
+  border-radius: 5px;
+  padding: 8px 10px;
+  color: #3f3029;
+  background: #fff;
+  font: inherit;
+}
+
+.makeAvailable,
+.makeUnavailable {
+  min-height: 38px;
+  border-radius: 20px;
+  border: 0;
+  padding: 8px 12px;
+  font: 700 11px 'Montserrat', sans-serif;
+  cursor: pointer;
+}
+
+.makeAvailable {
+  background: #e7f5ea;
+  color: #28633b;
+}
+
+.makeUnavailable {
+  background: #fff1ed;
+  color: #8d4434;
+}
+
 .available,
 .unavailable {
   text-align: right;

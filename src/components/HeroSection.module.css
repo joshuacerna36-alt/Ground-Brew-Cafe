@@ -1563,6 +1563,17 @@
   border: 1px solid #e0e0e0;
 }
 
+.menuItem:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 14px 30px rgba(83, 23, 24, .16);
+  border-color: rgba(245, 127, 41, .65);
+}
+
+.menuItem:focus-within {
+  border-color: #f57f29;
+  box-shadow: 0 0 0 3px rgba(245, 127, 41, .18);
+}
+
 .itemPreview {
   display: block;
   flex: 1;
@@ -1606,6 +1617,12 @@
   object-fit: cover;
   object-position: center;
   transition: none;
+}
+
+.menuItem:hover .menuItemImage img,
+.menuItem:focus-within .menuItemImage img {
+  transform: scale(1.035);
+  transition: transform .25s ease;
 }
 
 .menuItem:hover .menuItemImage img {

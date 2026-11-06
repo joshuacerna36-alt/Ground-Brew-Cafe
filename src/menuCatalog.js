@@ -42,3 +42,24 @@ export const orderCatalog = new Map([
   [303, { name: 'Peach Espresso Pop', priceCents: 24000 }],
   [304, { name: 'Honey Lemon Americano · 8oz', priceCents: 18000 }]
 ])
+
+const MENU_OVERRIDES_KEY = 'grounded_menu_overrides'
+
+export const getMenuOverrides = () => {
+  try {
+    return JSON.parse(window.localStorage.getItem(MENU_OVERRIDES_KEY) || '{}')
+  } catch {
+    return {}
+  }
+}
+
+export const saveMenuOverride = (id, changes) => {
+  const overrides = getMenuOverrides()
+  overrides[String(id)] = { ...overrides[String(id)], ...changes }
+  window.localStorage.setItem(MENU_OVERRIDES_KEY, JSON.stringify(overrides))
+}
+
+export const getCatalogItem = (id, fallback) => {
+  const override = getMenuOverrides()[String(id)]
+  return override ? { ...fallback, ...override } : fallback
+}

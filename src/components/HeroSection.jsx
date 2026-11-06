@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import styles from './HeroSection.module.css'
 import StaffDashboard from './StaffDashboard'
 import { apiFetch, notifyAuthChange, onAuthChange } from '../api'
+import { getCatalogItem } from '../menuCatalog.js'
 
 const php = (value) => `₱${value.toFixed(2)}`
 const asset = (path) => {
@@ -64,6 +65,20 @@ const menuData = {
     { id: 13, name: 'Focaccia', price: 365.18, priceDisplay: php(365.18), currency: 'PHP', description: 'Herb-infused focaccia with olive oil.', image: '/Focaccia.png' }
   ]
 }
+
+Object.keys(menuData).forEach((category) => {
+  menuData[category] = menuData[category].map((item) => {
+    const override = getCatalogItem(item.id, null)
+    if (!override) return item
+    return {
+      ...item,
+      name: override.name ?? item.name,
+      price: override.priceCents == null ? item.price : override.priceCents / 100,
+      priceDisplay: override.priceCents == null ? item.priceDisplay : php(override.priceCents / 100),
+      soldOut: typeof override.soldOut === 'boolean' ? override.soldOut : item.soldOut
+    }
+  })
+})
 
 const categories = Object.keys(menuData)
 const logo = asset('/grounded-brew-logo.png')
@@ -148,8 +163,8 @@ const ContactIcon = ({ type }) => {
   )
 }
 
-const HeroSection = () => {
-  const [activePage, setActivePage] = useState('Home')
+const HeroSection = ({ customerDashboard = false }) => {
+  const [activePage, setActivePage] = useState(customerDashboard ? 'Order Online' : 'Home')
   const [activeFeature, setActiveFeature] = useState(categories[0])
   const [cart, setCart] = useState([])
   const [showCart, setShowCart] = useState(false)
@@ -361,6 +376,10 @@ const HeroSection = () => {
       window.location.replace(`${import.meta.env.BASE_URL}#staff`)
       return
     }
+    if (user.role === 'customer' || customerDashboard) {
+      window.location.replace(`${import.meta.env.BASE_URL}#customer`)
+      return
+    }
     if (pendingItem) {
       setCart((currentCart) => [...currentCart, { ...pendingItem, cartId: Date.now() + Math.random() }])
     }
@@ -475,11 +494,15 @@ const HeroSection = () => {
           </button>
           <nav className={styles.navLinks} aria-label="Main navigation">
             {[
-              { label: 'Home', page: 'Home' },
-              { label: 'Menu', page: 'Menu' },
+              ...(!customerDashboard ? [
+                { label: 'Home', page: 'Home' },
+                { label: 'Menu', page: 'Menu' }
+              ] : []),
               { label: 'Order Online', page: 'Order Online' },
-              { label: 'About', page: 'About' },
-              { label: 'Contact', page: 'Contact' }
+              ...(!customerDashboard ? [
+                { label: 'About', page: 'About' },
+                { label: 'Contact', page: 'Contact' }
+              ] : [])
             ].map(({ label, page }) => (
               <button
                 key={label}

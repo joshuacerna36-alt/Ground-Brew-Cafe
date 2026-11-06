@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import styles from './StaffDashboard.module.css'
-import { orderCatalog } from '../menuCatalog.js'
+import { getCatalogItem, getMenuOverrides, orderCatalog, saveMenuOverride } from '../menuCatalog.js'
 import { apiFetch } from '../api'
 
 const currency = (cents) => new Intl.NumberFormat('en-PH', {
@@ -47,6 +47,12 @@ function StaffDashboard({ user, section = 'Orders', embedded = false }) {
   const [loading, setLoading] = useState(true)
   const [busyId, setBusyId] = useState('')
   const [error, setError] = useState('')
+  const [menuOverrides, setMenuOverrides] = useState(getMenuOverrides)
+
+  const updateCatalogItem = (id, changes) => {
+    saveMenuOverride(id, changes)
+    setMenuOverrides(getMenuOverrides())
+  }
 
   const loadDashboard = useCallback(async () => {
     setLoading(true)
@@ -161,15 +167,49 @@ function StaffDashboard({ user, section = 'Orders', embedded = false }) {
             <h2>{section === 'Availability' ? 'Availability' : 'Menu catalog'}</h2>
             <p>Current items and availability values from the café catalog.</p>
           </div>
-          {[...orderCatalog.entries()].map(([id, item]) => (
-            <div className={styles.catalogItem} key={id}>
-              <span><strong>{item.name}</strong><small>Catalog #{id}</small></span>
-              <span>{(item.priceCents / 100).toLocaleString('en-PH', { style: 'currency', currency: 'PHP' })}</span>
-              <strong className={item.soldOut ? styles.unavailable : styles.available}>
-                {item.soldOut ? 'Unavailable' : 'Available'}
-              </strong>
-            </div>
-          ))}
+          {[...orderCatalog.entries()].map(([id, original]) => {
+            const item = getCatalogItem(id, original)
+            return (
+              <div className={styles.catalogItem} key={id}>
+                {section === 'Menu catalog' ? (
+                  <>
+                    <label className={styles.catalogField}>
+                      Item name
+                      <input
+                        defaultValue={item.name}
+                        key={`${id}-${item.name}`}
+                        onBlur={(event) => updateCatalogItem(id, { name: event.target.value.trim() })}
+                      />
+                    </label>
+                    <label className={styles.catalogField}>
+                      Price (PHP)
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        defaultValue={(item.priceCents / 100).toFixed(2)}
+                        key={`${id}-${item.priceCents}`}
+                        onBlur={(event) => updateCatalogItem(id, { priceCents: Math.round(Number(event.target.value) * 100) })}
+                      />
+                    </label>
+                  </>
+                ) : (
+                  <>
+                    <span><strong>{item.name}</strong><small>Catalog #{id}</small></span>
+                    <span>{(item.priceCents / 100).toLocaleString('en-PH', { style: 'currency', currency: 'PHP' })}</span>
+                  </>
+                )}
+                <button
+                  type="button"
+                  className={item.soldOut ? styles.makeAvailable : styles.makeUnavailable}
+                  onClick={() => updateCatalogItem(id, { soldOut: !item.soldOut })}
+                  aria-label={`Mark ${item.name} ${item.soldOut ? 'available' : 'unavailable'}`}
+                >
+                  {item.soldOut ? 'Unavailable' : 'Available'}
+                </button>
+              </div>
+            )
+          })}
         </section>
       ) : showOrders && loading ? (
         <p className={styles.empty}>Loading dashboard…</p>
