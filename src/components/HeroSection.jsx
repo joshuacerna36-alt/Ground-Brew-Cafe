@@ -199,6 +199,10 @@ const HeroSection = ({ customerDashboard = false }) => {
   const [pendingItem, setPendingItem] = useState(null)
   const [authUnavailable, setAuthUnavailable] = useState(false)
 
+  useEffect(() => {
+    if (customerDashboard) setActivePage('Dashboard')
+  }, [customerDashboard])
+
   useEffect(() => onAuthChange((user) => setAuthUser(user)), [])
 
   useEffect(() => {
@@ -446,6 +450,7 @@ const HeroSection = ({ customerDashboard = false }) => {
       return
     }
     if (user.role === 'customer' || customerDashboard) {
+      setActivePage('Dashboard')
       window.location.replace(`${import.meta.env.BASE_URL}#customer`)
       return
     }
