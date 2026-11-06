@@ -222,24 +222,7 @@ const HeroSection = () => {
     let active = true
     setCustomerOrdersBusy(true)
     setCustomerOrdersError('')
-<<<<<<< HEAD
     apiFetch('/api/orders')
-=======
-    const staticSite = window.location.hostname.endsWith('github.io')
-      || !['localhost', '127.0.0.1'].includes(window.location.hostname)
-    if (staticSite) {
-      try {
-        const orders = JSON.parse(window.localStorage.getItem('grounded_mock_orders') || '[]')
-        if (active) setCustomerOrders(orders)
-      } catch {
-        if (active) setCustomerOrders([])
-      } finally {
-        if (active) setCustomerOrdersBusy(false)
-      }
-      return () => { active = false }
-    }
-    fetch('/api/orders')
->>>>>>> de01c24adbc88fcceb112891a358ede3cd8a5f28
       .then(async (response) => {
         const result = await response.json()
         if (!response.ok) throw new Error(result.error || 'Could not load your orders.')
@@ -322,50 +305,7 @@ const HeroSection = () => {
       const quantities = new Map()
       for (const item of cart) quantities.set(item.id, (quantities.get(item.id) || 0) + 1)
       const items = [...quantities].map(([id, quantity]) => ({ id, quantity }))
-<<<<<<< HEAD
       const response = await apiFetch('/api/orders', {
-=======
-      const staticSite = window.location.hostname.endsWith('github.io')
-        || !['localhost', '127.0.0.1'].includes(window.location.hostname)
-      if (staticSite) {
-        const groupedItems = [...quantities].map(([id, quantity]) => {
-          const catalogItem = cart.find((item) => item.id === id)
-          const lineTotalCents = Math.round((catalogItem?.price || 0) * 100) * quantity
-          return {
-            id,
-            quantity,
-            name: catalogItem?.name || `Item ${id}`,
-            lineTotalCents
-          }
-        })
-        const subtotalCents = groupedItems.reduce((sum, item) => sum + item.lineTotalCents, 0)
-        const order = {
-          id: `mock-order-${Date.now()}`,
-          orderNumber: `GB-${String(Date.now()).slice(-6)}`,
-          customerName: authUser.name,
-          customerEmail: authUser.email,
-          contactPhone,
-          fulfillment,
-          scheduledAt: `${scheduleDate}T${scheduleTime}:00+08:00`,
-          deliveryAddress: fulfillment === 'delivery' ? deliveryAddress : '',
-          deliveryDistanceMeters: 0,
-          deliveryFeeCents: 0,
-          items: groupedItems,
-          subtotalCents,
-          totalCents: subtotalCents,
-          paymentMethod,
-          paymentStatus: 'unpaid',
-          status: 'placed'
-        }
-        const storedOrders = JSON.parse(window.localStorage.getItem('grounded_mock_orders') || '[]')
-        window.localStorage.setItem('grounded_mock_orders', JSON.stringify([order, ...storedOrders]))
-        setPlacedOrder(order)
-        setCart([])
-        setFulfillment('pickup')
-        return
-      }
-      const response = await fetch('/api/orders', {
->>>>>>> de01c24adbc88fcceb112891a358ede3cd8a5f28
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -509,20 +449,7 @@ const HeroSection = () => {
 
   const handleLogout = async () => {
     try {
-<<<<<<< HEAD
       const response = await apiFetch('/api/auth/logout', { method: 'POST' })
-=======
-      const staticSite = window.location.hostname.endsWith('github.io')
-        || !['localhost', '127.0.0.1'].includes(window.location.hostname)
-      if (staticSite) {
-        window.localStorage.removeItem('grounded_mock_user')
-        setAuthUser(null)
-        setCart([])
-        setActivePage('Home')
-        return
-      }
-      const response = await fetch('/api/auth/logout', { method: 'POST' })
->>>>>>> de01c24adbc88fcceb112891a358ede3cd8a5f28
       if (!response.ok) throw new Error('Could not sign out.')
       setAuthUser(null)
       notifyAuthChange(null)
