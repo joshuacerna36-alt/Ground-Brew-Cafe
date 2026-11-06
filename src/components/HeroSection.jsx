@@ -170,6 +170,7 @@ const HeroSection = ({ customerDashboard = false }) => {
   const [cart, setCart] = useState([])
   const [showCart, setShowCart] = useState(false)
   const [showCheckout, setShowCheckout] = useState(false)
+  const [selectedMenuItem, setSelectedMenuItem] = useState(null)
   const [serviceConfig, setServiceConfig] = useState(null)
   const [serviceConfigError, setServiceConfigError] = useState('')
   const [checkoutError, setCheckoutError] = useState('')
@@ -199,6 +200,20 @@ const HeroSection = ({ customerDashboard = false }) => {
   const [authUnavailable, setAuthUnavailable] = useState(false)
 
   useEffect(() => onAuthChange((user) => setAuthUser(user)), [])
+
+  useEffect(() => {
+    if (!authUser) return
+    const pendingCheckout = window.sessionStorage.getItem('grounded_pending_checkout')
+    if (!pendingCheckout) return
+    try {
+      const item = JSON.parse(pendingCheckout)
+      setCart((currentCart) => [...currentCart, { ...item, cartId: Date.now() + Math.random() }])
+      setShowCheckout(true)
+    } catch {
+      window.sessionStorage.removeItem('grounded_pending_checkout')
+    }
+    window.sessionStorage.removeItem('grounded_pending_checkout')
+  }, [authUser])
 
   useEffect(() => {
     let active = true
@@ -281,6 +296,15 @@ const HeroSection = ({ customerDashboard = false }) => {
     return () => window.removeEventListener('keydown', closeOnEscape)
   }, [showAuth])
 
+  useEffect(() => {
+    if (!selectedMenuItem) return undefined
+    const closeOnEscape = (event) => {
+      if (event.key === 'Escape') setSelectedMenuItem(null)
+    }
+    window.addEventListener('keydown', closeOnEscape)
+    return () => window.removeEventListener('keydown', closeOnEscape)
+  }, [selectedMenuItem])
+
   const openAuth = (item = null) => {
     setPendingItem(item)
     setAuthError('')
@@ -294,6 +318,20 @@ const HeroSection = ({ customerDashboard = false }) => {
       return
     }
     setCart((currentCart) => [...currentCart, { ...item, cartId: Date.now() + Math.random() }])
+  }
+
+  const checkoutMenuItem = (item) => {
+    setSelectedMenuItem(null)
+    if (!authUser) {
+      window.sessionStorage.setItem('grounded_pending_checkout', JSON.stringify(item))
+      openAuth(item)
+      return
+    }
+    setCart((currentCart) => [...currentCart, { ...item, cartId: Date.now() + Math.random() }])
+    setShowCart(false)
+    setPlacedOrder(null)
+    setShowCheckout(true)
+    setCheckoutError('')
   }
 
   const removeFromCart = (cartId) => {
@@ -489,7 +527,7 @@ const HeroSection = ({ customerDashboard = false }) => {
               <article className={styles.menuItem} key={item.id}>
                 <button
                   className={styles.itemPreview}
-                  onClick={() => addToCart(item)}
+                  onClick={() => setSelectedMenuItem(item)}
                   disabled={item.soldOut}
                   aria-label={`${item.soldOut ? 'Sold out: ' : 'Select '}${item.name}, ${item.priceDisplay}`}
                 >
@@ -606,7 +644,7 @@ const HeroSection = ({ customerDashboard = false }) => {
             <div className={styles.customerProductGrid}>
               {featuredItems.map((item) => (
                 <article className={styles.customerProductCard} key={item.id}>
-                  <button className={styles.customerProductButton} type="button" onClick={() => !item.soldOut && addToCart(item)} disabled={item.soldOut}>
+                  <button className={styles.customerProductButton} type="button" onClick={() => !item.soldOut && setSelectedMenuItem(item)} disabled={item.soldOut}>
                     <img src={asset(item.image)} alt="" loading="lazy" />
                     <div>
                       <h3>{item.name}</h3>
@@ -629,7 +667,7 @@ const HeroSection = ({ customerDashboard = false }) => {
             <div className={styles.customerProductGrid}>
               {bestSellerItems.map((item) => (
                 <article className={styles.customerProductCard} key={item.id}>
-                  <button className={styles.customerProductButton} type="button" onClick={() => !item.soldOut && addToCart(item)} disabled={item.soldOut}>
+                  <button className={styles.customerProductButton} type="button" onClick={() => !item.soldOut && setSelectedMenuItem(item)} disabled={item.soldOut}>
                     <img src={asset(item.image)} alt="" loading="lazy" />
                     <div>
                       <h3>{item.name}</h3>
@@ -671,7 +709,7 @@ const HeroSection = ({ customerDashboard = false }) => {
                   <article className={styles.menuItem} key={item.id}>
                     <button
                       className={styles.itemPreview}
-                      onClick={() => addToCart(item)}
+                      onClick={() => setSelectedMenuItem(item)}
                       disabled={item.soldOut}
                       aria-label={`${item.soldOut ? 'Sold out: ' : 'Select '}${item.name}, ${item.priceDisplay}`}
                     >
@@ -899,6 +937,57 @@ const HeroSection = ({ customerDashboard = false }) => {
           <p className={styles.footerCopyright}>© {new Date().getFullYear()} Grounded Brew Café</p>
         </div>
       </footer>
+
+      {selectedMenuItem && (
+        <div className={styles.itemModalOverlay} onClick={() => setSelectedMenuItem(null)}>
+          <section
+            className={styles.itemModal}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="menu-item-modal-title"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button
+              className={styles.itemModalClose}
+              type="button"
+              onClick={() => setSelectedMenuItem(null)}
+              aria-label="Close item details"
+            >
+              ×
+            </button>
+            <img src={asset(selectedMenuItem.image)} alt={selectedMenuItem.name} />
+            <div className={styles.itemModalContent}>
+              <p className={styles.eyebrow}>Grounded Brew Café</p>
+              <h2 id="menu-item-modal-title">{selectedMenuItem.name}</h2>
+              <strong className={styles.itemModalPrice}>{selectedMenuItem.priceDisplay}</strong>
+              <p>{selectedMenuItem.description}</p>
+              {selectedMenuItem.soldOut ? (
+                <p className={styles.itemModalUnavailable}>Currently unavailable</p>
+              ) : (
+                <div className={styles.itemModalActions}>
+                  <button
+                    type="button"
+                    className={styles.itemModalSecondary}
+                    onClick={() => {
+                      addToCart(selectedMenuItem)
+                      setSelectedMenuItem(null)
+                    }}
+                  >
+                    Add to order
+                  </button>
+                  <button
+                    type="button"
+                    className={styles.itemModalPrimary}
+                    onClick={() => checkoutMenuItem(selectedMenuItem)}
+                  >
+                    Checkout
+                  </button>
+                </div>
+              )}
+            </div>
+          </section>
+        </div>
+      )}
 
       {showAuth && (
         <div className={styles.authOverlay} onClick={() => { setShowAuth(false); setPendingItem(null) }}>
