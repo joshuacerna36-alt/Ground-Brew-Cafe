@@ -1772,8 +1772,10 @@
 
 .itemModal {
   position: relative;
-  width: min(820px, 100%);
+  width: min(920px, 100%);
   max-height: calc(100vh - 40px);
+  display: grid;
+  grid-template-columns: minmax(0, 48%) minmax(0, 52%);
   overflow-y: auto;
   border-radius: 10px;
   background: #fff;
@@ -1782,7 +1784,8 @@
 
 .itemModal > img {
   width: 100%;
-  height: min(390px, 42vh);
+  height: 100%;
+  min-height: 520px;
   object-fit: cover;
 }
 
@@ -1803,6 +1806,9 @@
 }
 
 .itemModalContent {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
   padding: 24px;
 }
 
@@ -1831,7 +1837,8 @@
 .itemModalActions {
   display: flex;
   gap: 12px;
-  margin-top: 22px;
+  margin-top: auto;
+  padding-top: 22px;
 }
 
 .itemModalPrimary,
@@ -1942,10 +1949,12 @@
   .itemModal {
     width: 100%;
     max-height: 92dvh;
+    display: block;
     border-radius: 18px 18px 0 0;
   }
 
   .itemModal > img {
+    min-height: 0;
     height: 260px;
   }
 

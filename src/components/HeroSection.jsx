@@ -973,7 +973,7 @@ const HeroSection = ({ customerDashboard = false }) => {
                       setSelectedMenuItem(null)
                     }}
                   >
-                    Add to order
+                    Add to Cart
                   </button>
                   <button
                     type="button"
