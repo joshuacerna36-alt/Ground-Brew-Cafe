@@ -57,7 +57,11 @@ function App() {
 
   return (
     <div>
-      <HeroSection customerDashboard={route === 'customer' || route === 'dashboard'} />
+      <HeroSection customerDashboard={
+        authUser?.role === 'customer'
+        || route === 'customer'
+        || route === 'dashboard'
+      } />
     </div>
   )
 }
