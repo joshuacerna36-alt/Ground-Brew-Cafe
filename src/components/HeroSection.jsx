@@ -451,7 +451,8 @@ const HeroSection = ({ customerDashboard = false }) => {
     }
     if (user.role === 'customer' || customerDashboard) {
       setActivePage('Dashboard')
-      window.location.replace(`${import.meta.env.BASE_URL}#customer`)
+      window.location.hash = 'customer'
+      window.location.reload()
       return
     }
     if (pendingItem) {
