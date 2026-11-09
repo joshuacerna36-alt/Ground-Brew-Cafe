@@ -1108,6 +1108,211 @@
   padding: 22px;
 }
 
+.profileCard {
+  max-width: 900px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: clamp(18px, 3vw, 28px);
+  background: var(--surface);
+  box-shadow: 0 8px 26px rgba(0, 0, 0, .08);
+}
+
+.profileCardHeading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 18px;
+}
+
+.profileCardHeading p {
+  margin: 0 0 5px;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.profileCardHeading h2 {
+  margin: 0;
+  color: var(--text);
+  font-size: 18px;
+}
+
+.profileRole {
+  border: 1px solid rgba(129, 140, 248, .25);
+  border-radius: 20px;
+  padding: 6px 10px;
+  background: rgba(99, 102, 241, .1);
+  color: var(--accent);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.profileForm {
+  display: grid;
+  grid-template-columns: minmax(150px, 210px) minmax(0, 1fr);
+  gap: clamp(20px, 4vw, 40px);
+  padding-top: 24px;
+}
+
+.profilePhotoColumn {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 10px;
+  text-align: center;
+}
+
+.profilePhotoPreview {
+  display: grid;
+  width: 124px;
+  height: 124px;
+  place-items: center;
+  overflow: hidden;
+  border: 3px solid var(--border);
+  border-radius: 50%;
+  background: var(--surface-muted);
+  color: var(--accent);
+  font-size: 42px;
+  font-weight: 750;
+}
+
+.profilePhotoPreview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profilePhotoButton,
+.profileRemoveButton {
+  display: inline-flex;
+  min-height: 36px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 0 11px;
+  background: var(--surface-raised);
+  color: var(--text);
+  font-size: 10px;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.profilePhotoButton:hover,
+.profileRemoveButton:hover {
+  border-color: var(--accent);
+}
+
+.profilePhotoButton input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.profilePhotoButton:focus-within,
+.profileRemoveButton:focus-visible,
+.profileFields input:focus-visible,
+.profileSaveButton:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.profilePhotoButton:has(input:disabled),
+.profileRemoveButton:disabled {
+  opacity: .6;
+  cursor: wait;
+}
+
+.profilePhotoColumn small {
+  max-width: 190px;
+  color: var(--muted);
+  font-size: 9px;
+  line-height: 1.6;
+}
+
+.profileFields {
+  display: grid;
+  align-content: start;
+  gap: 15px;
+}
+
+.profileFields label {
+  display: grid;
+  gap: 7px;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.profileFields input {
+  width: 100%;
+  min-height: 42px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 0 11px;
+  outline: none;
+  background: var(--surface-raised);
+  color: var(--text);
+  font: inherit;
+  font-size: 12px;
+}
+
+.profileFields input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, .12);
+}
+
+.profileFields > p {
+  margin: -7px 0 0;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.profileFields > .profileError {
+  margin: 0;
+  color: var(--red);
+  font-weight: 600;
+}
+
+.profileFields > .profileSuccess {
+  margin: 0;
+  color: var(--green);
+  font-weight: 600;
+}
+
+.profileSaveButton {
+  justify-self: start;
+  min-height: 40px;
+  border: 1px solid var(--accent-strong);
+  border-radius: 7px;
+  padding: 0 15px;
+  background: var(--accent-strong);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: filter .18s ease, transform .18s ease;
+}
+
+.profileSaveButton:hover:not(:disabled) {
+  filter: brightness(1.13);
+  transform: translateY(-1px);
+}
+
+.profileSaveButton:disabled {
+  opacity: .6;
+  cursor: wait;
+}
+
 .settingsCard h2 {
   margin: 0 0 5px;
   color: var(--text);
@@ -1369,6 +1574,23 @@
   .settingsCard {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .profileForm {
+    grid-template-columns: 1fr;
+  }
+
+  .profilePhotoColumn {
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .profilePhotoColumn small {
+    max-width: none;
+  }
+
+  .profileSaveButton {
+    justify-self: stretch;
   }
 }
 

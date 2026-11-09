@@ -459,14 +459,17 @@
 }
 
 :global([data-theme='dark']) .page {
+  background: transparent;
   color: #edf2fb;
 }
 
 :global([data-theme='dark']) .heading h1,
 :global([data-theme='dark']) .accounts h2,
 :global([data-theme='dark']) .orderTop h2,
+:global([data-theme='dark']) .scheduled,
 :global([data-theme='dark']) .amounts .total,
 :global([data-theme='dark']) .accountRow strong,
+:global([data-theme='dark']) .catalogItem strong,
 :global([data-theme='dark']) .catalogAdminHeading h2 {
   color: #edf2fb;
 }
@@ -487,13 +490,27 @@
   color: #9aa8bb;
 }
 
+:global([data-theme='dark']) .catalogItem > span:nth-child(2) {
+  color: #d7dfec;
+}
+
 :global([data-theme='dark']) .orderCard,
 :global([data-theme='dark']) .accounts,
 :global([data-theme='dark']) .catalogAdmin,
 :global([data-theme='dark']) .empty {
   border-color: #202c3e;
-  background: #0c1421;
+  background: #111c2c;
   box-shadow: 0 8px 26px rgba(0, 0, 0, .08);
+}
+
+:global([data-theme='dark']) .catalogAdminHeading,
+:global([data-theme='dark']) .catalogItem {
+  background: #111c2c;
+}
+
+:global([data-theme='dark']) .accountRow:hover,
+:global([data-theme='dark']) .catalogItem:hover {
+  background: #151f30;
 }
 
 :global([data-theme='dark']) .empty {
@@ -552,14 +569,56 @@
   color: #edf2fb;
 }
 
+:global([data-theme='dark']) .roleLabel select:focus-visible,
+:global([data-theme='dark']) .accountButton:focus-visible,
+:global([data-theme='dark']) .deleteAccountButton:focus-visible,
+:global([data-theme='dark']) .catalogField input:focus-visible,
+:global([data-theme='dark']) .refresh:focus-visible,
+:global([data-theme='dark']) .action:focus-visible,
+:global([data-theme='dark']) .cancel:focus-visible,
+:global([data-theme='dark']) .makeAvailable:focus-visible,
+:global([data-theme='dark']) .makeUnavailable:focus-visible {
+  outline: 2px solid #818cf8;
+  outline-offset: 2px;
+}
+
+:global([data-theme='dark']) .accountButton:hover {
+  border-color: #818cf8;
+  background: #1b2940;
+  color: #c7d2fe;
+}
+
+:global([data-theme='dark']) .accountStatusActive,
+:global([data-theme='dark']) .available {
+  color: #34d399;
+}
+
+:global([data-theme='dark']) .accountStatusInactive,
+:global([data-theme='dark']) .unavailable {
+  color: #fb7185;
+}
+
+:global([data-theme='dark']) .adminBadge {
+  color: #fbbf24;
+}
+
 :global([data-theme='dark']) .makeAvailable {
   background: rgba(52, 211, 153, .12);
   color: #34d399;
 }
 
+:global([data-theme='dark']) .makeAvailable:hover {
+  background: rgba(52, 211, 153, .2);
+}
+
 :global([data-theme='dark']) .makeUnavailable {
   background: rgba(251, 113, 133, .12);
   color: #fb7185;
+}
+
+:global([data-theme='dark']) .makeUnavailable:hover,
+:global([data-theme='dark']) .deleteAccountButton:hover {
+  background: rgba(251, 113, 133, .2);
 }
 
 :global([data-theme='dark']) .error {
@@ -570,12 +629,40 @@
 
 :global([data-theme='dark']) .refresh,
 :global([data-theme='dark']) .action {
+  border: 1px solid #6366f1;
   background: #6366f1;
+  color: #fff;
+}
+
+:global([data-theme='dark']) .refresh:hover,
+:global([data-theme='dark']) .action:hover {
+  border-color: #818cf8;
+  background: #5558e8;
+}
+
+:global([data-theme='dark']) .refresh:disabled,
+:global([data-theme='dark']) .action:disabled,
+:global([data-theme='dark']) .cancel:disabled,
+:global([data-theme='dark']) .accountButton:disabled,
+:global([data-theme='dark']) .deleteAccountButton:disabled {
+  opacity: .5;
 }
 
 :global([data-theme='dark']) .cancel,
 :global([data-theme='dark']) .deleteAccountButton {
   border-color: #733844;
-  background: #0c1421;
+  background: #111c2c;
   color: #fb7185;
+}
+
+:global([data-theme='dark']) .cancel:hover {
+  background: rgba(251, 113, 133, .12);
+}
+
+:global([data-theme='dark']) .catalogField input::placeholder {
+  color: #7c8aa0;
+}
+
+:global([data-theme='dark']) .catalogItem:last-child {
+  border-bottom: 0;
 }

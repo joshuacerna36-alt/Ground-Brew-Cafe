@@ -337,7 +337,14 @@ async function handleAuth(pathname, method, body) {
 
   if (pathname === '/api/auth/profile' && method === 'PUT') {
     const row = requireUser()
-    const image = body.profileImage
+    const name = body.name === undefined ? row.display_name : typeof body.name === 'string' ? body.name.trim() : ''
+    const email = body.email === undefined ? row.email : typeof body.email === 'string' ? body.email.trim().toLowerCase() : ''
+    const image = body.profileImage === undefined ? row.profile_image || null : body.profileImage
+    if (name.length < 2 || name.length > 80) throw fail(400, 'Name must be between 2 and 80 characters.')
+    if (!EMAIL_PATTERN.test(email) || email.length > 254) throw fail(400, 'Enter a valid email address.')
+    if (loadUsers().some((user) => user.id !== row.id && user.email.toLowerCase() === email)) {
+      return { status: 409, body: { error: 'An account with that email address already exists.' } }
+    }
     if (image !== null && (typeof image !== 'string' || image.length > 420 * 1024)) {
       throw fail(400, 'Choose a profile image smaller than 300 KB.')
     }
@@ -353,6 +360,8 @@ async function handleAuth(pathname, method, body) {
       const isWebp = match[1] === 'webp' && String.fromCharCode(...bytes.slice(0, 4)) === 'RIFF' && String.fromCharCode(...bytes.slice(8, 12)) === 'WEBP'
       if (!isJpeg && !isPng && !isWebp) throw fail(400, 'The selected file is not a valid image.')
     }
+    row.display_name = name
+    row.email = email
     row.profile_image = image
     saveUsers(loadUsers().map((user) => user.id === row.id ? row : user))
     return { status: 200, body: { user: publicUser(row) } }

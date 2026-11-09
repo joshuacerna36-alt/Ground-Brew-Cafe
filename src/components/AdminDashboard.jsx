@@ -12,6 +12,7 @@ const navigation = [
   { section: 'Access roles', group: 'Management', icon: 'roles' },
   { section: 'Menu catalog', group: 'Management', icon: 'menu' },
   { section: 'Availability', group: 'Management', icon: 'availability' },
+  { section: 'My profile', group: 'System', icon: 'profile' },
   { section: 'Settings', group: 'System', icon: 'settings' }
 ]
 
@@ -47,7 +48,8 @@ function AdminIcon({ name }) {
     roles: <><path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z" /><path d="m9 12 2 2 4-4" /></>,
     menu: <><path d="M4 6h16M4 12h16M4 18h16" /><circle cx="7" cy="6" r="1" fill="currentColor" /><circle cx="7" cy="12" r="1" fill="currentColor" /><circle cx="7" cy="18" r="1" fill="currentColor" /></>,
     availability: <><circle cx="12" cy="12" r="9" /><path d="m8 12 2.5 2.5L16 9" /></>,
-    settings: <><circle cx="12" cy="12" r="3" /><path d="m19.4 15 .1.1 1.4 1.1-1.4 2.4-1.7-.6a8 8 0 0 1-1.6.9l-.3 1.8h-2.8l-.3-1.8a8 8 0 0 1-1.6-.9l-1.7.6-1.4-2.4L7.5 15a8 8 0 0 1 0-1.9L6.1 12l1.4-2.4 1.7.6a8 8 0 0 1 1.6-.9l.3-1.8h2.8l.3 1.8a8 8 0 0 1 1.6.9l1.7-.6 1.4 2.4-1.4 1.1a8 8 0 0 1-.1 1.9Z" /></>
+    settings: <><circle cx="12" cy="12" r="3" /><path d="m19.4 15 .1.1 1.4 1.1-1.4 2.4-1.7-.6a8 8 0 0 1-1.6.9l-.3 1.8h-2.8l-.3-1.8a8 8 0 0 1-1.6-.9l-1.7.6-1.4-2.4L7.5 15a8 8 0 0 1 0-1.9L6.1 12l1.4-2.4 1.7.6a8 8 0 0 1 1.6-.9l.3-1.8h2.8l.3 1.8a8 8 0 0 1 1.6.9l1.7-.6 1.4 2.4-1.4 1.1a8 8 0 0 1-.1 1.9Z" /></>,
+    profile: <><circle cx="12" cy="8" r="4" /><path d="M5 21a7 7 0 0 1 14 0" /></>
   }
 
   return (
@@ -268,6 +270,129 @@ function AnalyticsDashboard({ orders, users, onRefresh, loading, searchTerm }) {
   )
 }
 
+function AdminProfile({ user, onUpdate }) {
+  const [name, setName] = useState(user.name || '')
+  const [email, setEmail] = useState(user.email || '')
+  const [profileImage, setProfileImage] = useState(user.profileImage || null)
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
+
+  useEffect(() => {
+    setName(user.name || '')
+    setEmail(user.email || '')
+    setProfileImage(user.profileImage || null)
+  }, [user.name, user.email, user.profileImage])
+
+  const selectPhoto = async (file) => {
+    if (!file) return
+    setError('')
+    setSuccess('')
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+      setError('Choose a JPEG, PNG, or WebP image.')
+      return
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      setError('Choose an image smaller than 10 MB.')
+      return
+    }
+    const objectUrl = URL.createObjectURL(file)
+    try {
+      const image = new Image()
+      image.src = objectUrl
+      await new Promise((resolve, reject) => {
+        image.onload = resolve
+        image.onerror = () => reject(new Error('Could not read the selected image.'))
+      })
+      const cropSize = Math.min(image.naturalWidth, image.naturalHeight)
+      const canvas = document.createElement('canvas')
+      canvas.width = 320
+      canvas.height = 320
+      const context = canvas.getContext('2d')
+      if (!context) throw new Error('Your browser could not process the selected image.')
+      context.drawImage(
+        image,
+        (image.naturalWidth - cropSize) / 2,
+        (image.naturalHeight - cropSize) / 2,
+        cropSize,
+        cropSize,
+        0,
+        0,
+        320,
+        320
+      )
+      setProfileImage(canvas.toDataURL('image/jpeg', 0.82))
+    } catch (photoError) {
+      setError(photoError.message || 'Could not process the selected image.')
+    } finally {
+      URL.revokeObjectURL(objectUrl)
+    }
+  }
+
+  const save = async (event) => {
+    event.preventDefault()
+    setBusy(true)
+    setError('')
+    setSuccess('')
+    try {
+      const response = await apiFetch('/api/auth/profile', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, profileImage })
+      })
+      const result = await response.json()
+      if (!response.ok) throw new Error(result.error || 'Could not update your profile.')
+      onUpdate(result.user)
+      setName(result.user.name)
+      setEmail(result.user.email)
+      setProfileImage(result.user.profileImage || null)
+      setSuccess('Your profile has been saved.')
+    } catch (saveError) {
+      setError(saveError.message || 'Could not update your profile.')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <section className={styles.profileCard} aria-labelledby="admin-profile-title">
+      <div className={styles.profileCardHeading}>
+        <div><p>Administrator account</p><h2 id="admin-profile-title">My profile</h2></div>
+        <span className={styles.profileRole}>Administrator</span>
+      </div>
+      <form className={styles.profileForm} onSubmit={save}>
+        <div className={styles.profilePhotoColumn}>
+          <div className={styles.profilePhotoPreview}>
+            {profileImage ? <img src={profileImage} alt="Admin profile" /> : <span>{(name || 'A').charAt(0).toUpperCase()}</span>}
+          </div>
+          <label className={styles.profilePhotoButton}>
+            Change photo
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              disabled={busy}
+              onChange={(event) => {
+                selectPhoto(event.target.files?.[0])
+                event.target.value = ''
+              }}
+            />
+          </label>
+          {profileImage && <button className={styles.profileRemoveButton} type="button" disabled={busy} onClick={() => setProfileImage(null)}>Remove photo</button>}
+          <small>JPEG, PNG, or WebP. Cropped and resized before saving.</small>
+        </div>
+        <div className={styles.profileFields}>
+          <label>Full name<input value={name} onChange={(event) => setName(event.target.value)} maxLength={80} required autoComplete="name" /></label>
+          <label>Email address<input value={email} onChange={(event) => setEmail(event.target.value)} maxLength={254} type="email" required autoComplete="email" /></label>
+          <p>Your updated email will be used the next time you sign in.</p>
+          {error && <p className={styles.profileError} role="alert">{error}</p>}
+          {success && <p className={styles.profileSuccess} role="status">{success}</p>}
+          <button className={styles.profileSaveButton} type="submit" disabled={busy}>{busy ? 'Saving profile…' : 'Save changes'}</button>
+        </div>
+      </form>
+    </section>
+  )
+}
+
 function AdminDashboard({ user }) {
   const [section, setSection] = useState('Overview')
   const [collapsed, setCollapsed] = useState(false)
@@ -345,6 +470,7 @@ function AdminDashboard({ user }) {
     setShowProfile(false)
   }
 
+  const updateProfile = (updatedUser) => notifyAuthChange(updatedUser)
   const newOrders = orders.filter((order) => order.status === 'received')
   const showAnalytics = section === 'Overview' || section === 'Analytics'
   const moduleSection = section === 'Orders' || section === 'Payments'
@@ -417,7 +543,7 @@ function AdminDashboard({ user }) {
                 <span className={styles.profileName}>{user.name}</span>
                 <span aria-hidden="true">⌄</span>
               </button>
-              {showProfile && <div className={`${styles.popover} ${styles.profilePopover}`}><strong>{user.name}</strong><small>{user.email}</small><button type="button" onClick={logout}>Sign out</button></div>}
+              {showProfile && <div className={`${styles.popover} ${styles.profilePopover}`}><strong>{user.name}</strong><small>{user.email}</small><button type="button" onClick={() => selectSection('My profile')}>Edit profile</button><button type="button" onClick={logout}>Sign out</button></div>}
             </div>
           </div>
         </header>
@@ -435,6 +561,8 @@ function AdminDashboard({ user }) {
             </section>
           ) : showAnalytics ? (
             <AnalyticsDashboard orders={orders} users={users} onRefresh={loadAnalytics} loading={loading} searchTerm={search} />
+          ) : section === 'My profile' ? (
+            <AdminProfile user={user} onUpdate={updateProfile} />
           ) : moduleSection ? (
             <StaffDashboard user={user} section={moduleSection} embedded searchTerm={search} />
           ) : null}
@@ -443,7 +571,7 @@ function AdminDashboard({ user }) {
       <nav className={styles.mobileNav} aria-label="Admin modules">
         {navigation.slice(0, 4).map((item) => <button key={item.section} className={section === item.section ? styles.mobileNavActive : ''} type="button" onClick={() => selectSection(item.section)}><AdminIcon name={item.icon} /><span>{item.section}</span></button>)}
         <select value={section} onChange={(event) => selectSection(event.target.value)} aria-label="More admin modules">
-          <option value="Accounts">Accounts</option><option value="Access roles">Access roles</option><option value="Menu catalog">Menu catalog</option><option value="Availability">Availability</option><option value="Settings">Settings</option><option value="Payments">Payments</option>
+          <option value="Accounts">Accounts</option><option value="Access roles">Access roles</option><option value="Menu catalog">Menu catalog</option><option value="Availability">Availability</option><option value="My profile">My profile</option><option value="Settings">Settings</option><option value="Payments">Payments</option>
         </select>
       </nav>
     </div>

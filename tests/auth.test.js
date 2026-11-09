@@ -110,12 +110,16 @@ test('registration without email delivery, login, logout, and database-backed se
     const profileUpdate = await fetch(`${baseUrl}/api/auth/profile`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json', Cookie: initialSession },
-      body: JSON.stringify({ profileImage })
+      body: JSON.stringify({ name: 'Updated Test Customer', profileImage })
     })
     assert.equal(profileUpdate.status, 200)
-    assert.equal((await profileUpdate.json()).user.profileImage, profileImage)
+    const updatedProfile = await profileUpdate.json()
+    assert.equal(updatedProfile.user.name, 'Updated Test Customer')
+    assert.equal(updatedProfile.user.profileImage, profileImage)
     const updatedSession = await fetch(`${baseUrl}/api/auth/me`, { headers: { Cookie: initialSession } })
-    assert.equal((await updatedSession.json()).user.profileImage, profileImage)
+    const updatedUser = (await updatedSession.json()).user
+    assert.equal(updatedUser.name, 'Updated Test Customer')
+    assert.equal(updatedUser.profileImage, profileImage)
 
     const duplicate = await fetch(`${baseUrl}/api/auth/register`, {
       method: 'POST',
@@ -141,6 +145,27 @@ test('registration without email delivery, login, logout, and database-backed se
     assert.equal(crossOrigin.status, 403)
     await crossOrigin.json()
 
+    const otherRegistration = await fetch(`${baseUrl}/api/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: 'Other Customer', email: 'other@example.invalid', password: 'secure-pass-456' })
+    })
+    assert.equal(otherRegistration.status, 201)
+
+    const emailUpdate = await fetch(`${baseUrl}/api/auth/profile`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', Cookie: initialSession },
+      body: JSON.stringify({ email: 'updated@example.invalid' })
+    })
+    assert.equal(emailUpdate.status, 200)
+    assert.equal((await emailUpdate.json()).user.email, 'updated@example.invalid')
+    const duplicateProfileEmail = await fetch(`${baseUrl}/api/auth/profile`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', Cookie: initialSession },
+      body: JSON.stringify({ email: 'other@example.invalid' })
+    })
+    assert.equal(duplicateProfileEmail.status, 409)
+
     const logout = await fetch(`${baseUrl}/api/auth/logout`, {
       method: 'POST',
       headers: { Cookie: initialSession }
@@ -152,7 +177,7 @@ test('registration without email delivery, login, logout, and database-backed se
     const persistentLoginResponse = await fetch(`${baseUrl}/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: 'test@example.invalid', password: 'secure-pass-123' })
+      body: JSON.stringify({ email: 'updated@example.invalid', password: 'secure-pass-123' })
     })
     assert.equal(persistentLoginResponse.status, 200)
     const persistentCookie = persistentLoginResponse.headers.get('set-cookie').split(';')[0]
@@ -161,7 +186,8 @@ test('registration without email delivery, login, logout, and database-backed se
 
     const persistedSession = await fetch(`${baseUrl}/api/auth/me`, { headers: { Cookie: persistentCookie } })
     const persistedUser = (await persistedSession.json()).user
-    assert.equal(persistedUser.email, 'test@example.invalid')
+    assert.equal(persistedUser.email, 'updated@example.invalid')
+    assert.equal(persistedUser.name, 'Updated Test Customer')
     assert.equal(persistedUser.profileImage, profileImage)
   } finally {
     if (child) await stopServer(child)

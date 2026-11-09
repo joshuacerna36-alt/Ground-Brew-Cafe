@@ -26,9 +26,11 @@ npm run dev
 
 The password is hashed before it is stored. Do not put real credentials in source control. Registration does not send or confirm email; customers can use any valid email-shaped address as their login name. Administrators can promote accounts to staff, deactivate/reactivate accounts, or delete accounts from the dashboard. Deactivation immediately revokes active sessions. Deletion removes the account's login and contact details while retaining anonymized order records.
 
-The SQLite database is stored in `data/accounts.sqlite` by default. Set `DATABASE_PATH` to a persistent volume path in production. Back up this database securely.
+The SQLite database is stored in `data/accounts.sqlite` by default. Set `DATABASE_PATH` to a persistent volume path in production and back up that file (including a consistent SQLite backup) regularly. The database is deliberately excluded from Git; pushing source code does not upload or back up user accounts or orders. No storage can be promised "forever" without durable hosting and backups.
 
 The server-backed customer dashboard lets a signed-in customer upload or remove a profile photo. Images are cropped and resized in the browser and saved with the account. The admin Overview and Analytics pages summarize order revenue, unpaid balance, paid orders, active customers, and pickup/delivery mix from the latest order and account records; they do not represent a bank balance or external venue data.
+
+Administrators can edit their own name, sign-in email, and profile photo from **My profile** in the admin dashboard. Email changes apply to the next sign-in.
 
 ## GitHub Pages
 
@@ -51,7 +53,7 @@ Things to know about this browser-only mode:
 - Everything in a static site's JavaScript is visible to visitors, including the built-in admin password above. Treat it as a public demo login only; never use it for a real shared server or sensitive data. To change the browser demo login, set `VITE_ADMIN_EMAIL` and `VITE_ADMIN_PASSWORD` in the workflow's build `env`.
 - Delivery quotes and GCash are unavailable (pickup + cash only), exactly as when the Node server has no Google Maps key.
 
-For real, shared accounts and orders, deploy `server.js` to a Node.js host with persistent storage, set `CORS_ALLOWED_ORIGIN` to your GitHub Pages URL on that server, then in the workflow replace `VITE_API_MODE: local` with `VITE_API_BASE_URL: https://your-server.example.com`. The site then uses the real server automatically.
+For real, shared accounts and orders, deploy `server.js` to a Node.js host with a persistent disk/volume, set `DATABASE_PATH` to that volume and `CORS_ALLOWED_ORIGIN` to your GitHub Pages URL on that server, then in the workflow replace `VITE_API_MODE: local` with `VITE_API_BASE_URL: https://your-server.example.com`. The site then uses the real server automatically. GitHub Pages alone cannot provide a shared SQLite database: browser-mode data stays in each visitor's local storage and is not transferred by deploying or pushing the site.
 
 ## Orders, delivery, and payments
 

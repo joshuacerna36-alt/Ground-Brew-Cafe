@@ -146,7 +146,8 @@ const statements = {
   anonymizeUser: database.prepare("UPDATE users SET display_name = 'Deleted account', email = 'deleted+' || id || '@deleted.invalid', password_hash = ?, password_salt = ?, role = 'customer', account_status = 'deleted', profile_image = NULL WHERE id = ? AND role != 'admin'"),
   countAdmins: database.prepare("SELECT COUNT(*) AS count FROM users WHERE role = 'admin'")
 }
-statements.updateProfileImage = database.prepare('UPDATE users SET profile_image = ? WHERE id = ?')
+statements.findOtherUserByEmail = database.prepare('SELECT id FROM users WHERE email = ? AND id != ?')
+statements.updateProfile = database.prepare('UPDATE users SET display_name = ?, email = ?, profile_image = ? WHERE id = ?')
 
 const hashToken = (token) => createHash('sha256').update(token).digest('hex')
 
@@ -273,7 +274,18 @@ async function handleAuth(request, response, pathname) {
       return sendJson(response, 415, { error: 'Profile updates must be submitted as JSON.' })
     }
     const body = await readJsonBody(request, 450 * 1024)
-    const image = body.profileImage
+    const name = body.name === undefined ? user.name : typeof body.name === 'string' ? body.name.trim() : ''
+    const email = body.email === undefined ? user.email : typeof body.email === 'string' ? body.email.trim().toLowerCase() : ''
+    const image = body.profileImage === undefined ? user.profileImage || null : body.profileImage
+    if (name.length < 2 || name.length > 80) {
+      throw Object.assign(new Error('Name must be between 2 and 80 characters.'), { status: 400 })
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 254) {
+      throw Object.assign(new Error('Enter a valid email address.'), { status: 400 })
+    }
+    if (statements.findOtherUserByEmail.get(email, user.id)) {
+      return sendJson(response, 409, { error: 'An account with that email address already exists.' })
+    }
     if (image !== null && (typeof image !== 'string' || image.length > 420 * 1024)) {
       throw Object.assign(new Error('Choose a profile image smaller than 300 KB.'), { status: 400 })
     }
@@ -291,8 +303,8 @@ async function handleAuth(request, response, pathname) {
           : bytes.subarray(0, 4).toString() === 'RIFF' && bytes.subarray(8, 12).toString() === 'WEBP'
       if (!validSignature) throw Object.assign(new Error('The selected file is not a valid image.'), { status: 400 })
     }
-    statements.updateProfileImage.run(image, user.id)
-    return sendJson(response, 200, { user: { ...user, profileImage: image } })
+    statements.updateProfile.run(name, email, image, user.id)
+    return sendJson(response, 200, { user: { ...user, name, email, profileImage: image } })
   }
 
   if (!['/api/auth/login', '/api/auth/register', '/api/auth/logout'].includes(pathname)) {
