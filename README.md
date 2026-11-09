@@ -28,6 +28,8 @@ The password is hashed before it is stored. Do not put real credentials in sourc
 
 The SQLite database is stored in `data/accounts.sqlite` by default. Set `DATABASE_PATH` to a persistent volume path in production. Back up this database securely.
 
+The server-backed customer dashboard lets a signed-in customer upload or remove a profile photo. Images are cropped and resized in the browser and saved with the account. The admin Overview and Analytics pages summarize order revenue, unpaid balance, paid orders, active customers, and pickup/delivery mix from the latest order and account records; they do not represent a bank balance or external venue data.
+
 ## GitHub Pages
 
 The `Deploy café site to GitHub Pages` workflow builds the Vite app and deploys the generated `dist` folder whenever changes are pushed to `main`. In the repository's **Settings → Pages**, select **GitHub Actions** as the build and deployment source. The Vite base path is configured for this project repository.
@@ -46,7 +48,7 @@ Anyone can also use **Register** to create their own customer account and log in
 Things to know about this browser-only mode:
 
 - Accounts and orders are saved per browser/device. They are **not shared** between devices, so an order placed on a customer's phone will not appear in an admin's browser on another computer.
-- Everything in a static site's JavaScript is visible to visitors, including the built-in admin password above. Treat it as a demo login. To change it, set `VITE_ADMIN_EMAIL` and `VITE_ADMIN_PASSWORD` in the workflow's build `env`.
+- Everything in a static site's JavaScript is visible to visitors, including the built-in admin password above. Treat it as a public demo login only; never use it for a real shared server or sensitive data. To change the browser demo login, set `VITE_ADMIN_EMAIL` and `VITE_ADMIN_PASSWORD` in the workflow's build `env`.
 - Delivery quotes and GCash are unavailable (pickup + cash only), exactly as when the Node server has no Google Maps key.
 
 For real, shared accounts and orders, deploy `server.js` to a Node.js host with persistent storage, set `CORS_ALLOWED_ORIGIN` to your GitHub Pages URL on that server, then in the workflow replace `VITE_API_MODE: local` with `VITE_API_BASE_URL: https://your-server.example.com`. The site then uses the real server automatically.

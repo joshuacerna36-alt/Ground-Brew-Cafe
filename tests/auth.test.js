@@ -106,6 +106,16 @@ test('registration without email delivery, login, logout, and database-backed se
     const initialSession = initialCookie.split(';')[0]
     const signedIn = await fetch(`${baseUrl}/api/auth/me`, { headers: { Cookie: initialSession } })
     assert.equal((await signedIn.json()).user.email, 'test@example.invalid')
+    const profileImage = `data:image/jpeg;base64,${Buffer.from([0xff, 0xd8, 0xff, 0xd9]).toString('base64')}`
+    const profileUpdate = await fetch(`${baseUrl}/api/auth/profile`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', Cookie: initialSession },
+      body: JSON.stringify({ profileImage })
+    })
+    assert.equal(profileUpdate.status, 200)
+    assert.equal((await profileUpdate.json()).user.profileImage, profileImage)
+    const updatedSession = await fetch(`${baseUrl}/api/auth/me`, { headers: { Cookie: initialSession } })
+    assert.equal((await updatedSession.json()).user.profileImage, profileImage)
 
     const duplicate = await fetch(`${baseUrl}/api/auth/register`, {
       method: 'POST',
@@ -150,7 +160,9 @@ test('registration without email delivery, login, logout, and database-backed se
     await startServer()
 
     const persistedSession = await fetch(`${baseUrl}/api/auth/me`, { headers: { Cookie: persistentCookie } })
-    assert.equal((await persistedSession.json()).user.email, 'test@example.invalid')
+    const persistedUser = (await persistedSession.json()).user
+    assert.equal(persistedUser.email, 'test@example.invalid')
+    assert.equal(persistedUser.profileImage, profileImage)
   } finally {
     if (child) await stopServer(child)
     await rm(directory, { recursive: true, force: true })

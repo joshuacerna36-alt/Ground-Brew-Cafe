@@ -20,6 +20,7 @@ const databasePath = path.resolve(process.env.DATABASE_PATH || path.join(rootDir
 const sessionCookie = 'grounded_session'
 const sessionDuration = 30 * 24 * 60 * 60
 const maxRequestBytes = 16 * 1024
+const maxProfileImageBytes = 300 * 1024
 const authLimits = new Map()
 const businessLimits = new Map()
 const orderStatuses = ['received', 'confirmed', 'preparing', 'ready', 'out_for_delivery', 'completed', 'cancelled']
@@ -52,6 +53,7 @@ database.exec(`
     password_hash TEXT NOT NULL,
     password_salt TEXT NOT NULL,
     role TEXT NOT NULL DEFAULT 'customer' CHECK(role IN ('customer', 'staff', 'admin')),
+    profile_image TEXT,
     email_verified INTEGER NOT NULL DEFAULT 1 CHECK(email_verified IN (0, 1)),
     account_status TEXT NOT NULL DEFAULT 'active' CHECK(account_status IN ('active', 'deactivated', 'deleted')),
     created_at INTEGER NOT NULL
@@ -106,6 +108,9 @@ if (!userColumns.some((column) => column.name === 'email_verified')) {
 if (!userColumns.some((column) => column.name === 'account_status')) {
   database.exec("ALTER TABLE users ADD COLUMN account_status TEXT NOT NULL DEFAULT 'active' CHECK(account_status IN ('active', 'deactivated', 'deleted'))")
 }
+if (!userColumns.some((column) => column.name === 'profile_image')) {
+  database.exec('ALTER TABLE users ADD COLUMN profile_image TEXT')
+}
 database.exec("UPDATE users SET email_verified = 1 WHERE email_verified = 0")
 database.exec('DROP TABLE IF EXISTS email_verifications')
 
@@ -114,7 +119,7 @@ const statements = {
   insertUser: database.prepare('INSERT INTO users (id, display_name, email, password_hash, password_salt, role, email_verified, account_status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'),
   insertSession: database.prepare('INSERT INTO sessions (token_hash, user_id, expires_at, created_at) VALUES (?, ?, ?, ?)'),
   findSession: database.prepare(`
-    SELECT users.id, users.display_name, users.email, users.role
+    SELECT users.id, users.display_name, users.email, users.role, users.profile_image
     FROM sessions JOIN users ON users.id = sessions.user_id
     WHERE sessions.token_hash = ? AND sessions.expires_at > ? AND users.account_status = 'active'
   `),
@@ -138,9 +143,10 @@ const statements = {
   updateUserAccess: database.prepare("UPDATE users SET role = ?, account_status = ? WHERE id = ? AND role != 'admin' AND account_status != 'deleted'"),
   deleteUserQuotes: database.prepare('DELETE FROM delivery_quotes WHERE customer_id = ?'),
   anonymizeUserOrders: database.prepare("UPDATE orders SET contact_phone = '', delivery_address = NULL WHERE customer_id = ?"),
-  anonymizeUser: database.prepare("UPDATE users SET display_name = 'Deleted account', email = 'deleted+' || id || '@deleted.invalid', password_hash = ?, password_salt = ?, role = 'customer', account_status = 'deleted' WHERE id = ? AND role != 'admin'"),
+  anonymizeUser: database.prepare("UPDATE users SET display_name = 'Deleted account', email = 'deleted+' || id || '@deleted.invalid', password_hash = ?, password_salt = ?, role = 'customer', account_status = 'deleted', profile_image = NULL WHERE id = ? AND role != 'admin'"),
   countAdmins: database.prepare("SELECT COUNT(*) AS count FROM users WHERE role = 'admin'")
 }
+statements.updateProfileImage = database.prepare('UPDATE users SET profile_image = ? WHERE id = ?')
 
 const hashToken = (token) => createHash('sha256').update(token).digest('hex')
 
@@ -183,7 +189,7 @@ function getSignedInUser(request) {
   const token = getSessionToken(request)
   if (!token) return null
   const row = statements.findSession.get(hashToken(token), Date.now())
-  return row ? { id: row.id, name: row.display_name, email: row.email, role: row.role } : null
+  return row ? { id: row.id, name: row.display_name, email: row.email, role: row.role, profileImage: row.profile_image } : null
 }
 
 function createLoginSession(user, response) {
@@ -194,12 +200,12 @@ function createLoginSession(user, response) {
   setSessionCookie(response, token)
 }
 
-async function readJsonBody(request) {
+async function readJsonBody(request, limit = maxRequestBytes) {
   let size = 0
   const chunks = []
   for await (const chunk of request) {
     size += chunk.length
-    if (size > maxRequestBytes) throw Object.assign(new Error('Request is too large.'), { status: 413 })
+    if (size > limit) throw Object.assign(new Error('Request is too large.'), { status: 413 })
     chunks.push(chunk)
   }
   try {
@@ -257,6 +263,36 @@ function allowBusinessAction(key, maxAttempts, interval, response, message) {
 async function handleAuth(request, response, pathname) {
   if (pathname === '/api/auth/me' && request.method === 'GET') {
     return sendJson(response, 200, { user: getSignedInUser(request) })
+  }
+
+  if (pathname === '/api/auth/profile' && request.method === 'PUT') {
+    if (!isSameOrigin(request)) return sendJson(response, 403, { error: 'Cross-origin profile updates are not allowed.' })
+    const user = requireUser(request, response)
+    if (!user) return
+    if (!request.headers['content-type']?.toLowerCase().startsWith('application/json')) {
+      return sendJson(response, 415, { error: 'Profile updates must be submitted as JSON.' })
+    }
+    const body = await readJsonBody(request, 450 * 1024)
+    const image = body.profileImage
+    if (image !== null && (typeof image !== 'string' || image.length > 420 * 1024)) {
+      throw Object.assign(new Error('Choose a profile image smaller than 300 KB.'), { status: 400 })
+    }
+    if (typeof image === 'string') {
+      const match = /^data:image\/(jpeg|png|webp);base64,([A-Za-z0-9+/]+={0,2})$/.exec(image)
+      if (!match) throw Object.assign(new Error('Choose a JPEG, PNG, or WebP profile image.'), { status: 400 })
+      const bytes = Buffer.from(match[2], 'base64')
+      if (!bytes.length || bytes.length > maxProfileImageBytes || bytes.toString('base64') !== match[2]) {
+        throw Object.assign(new Error('Choose a profile image smaller than 300 KB.'), { status: 400 })
+      }
+      const validSignature = match[1] === 'jpeg'
+        ? bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[bytes.length - 2] === 0xff && bytes[bytes.length - 1] === 0xd9
+        : match[1] === 'png'
+          ? bytes.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]))
+          : bytes.subarray(0, 4).toString() === 'RIFF' && bytes.subarray(8, 12).toString() === 'WEBP'
+      if (!validSignature) throw Object.assign(new Error('The selected file is not a valid image.'), { status: 400 })
+    }
+    statements.updateProfileImage.run(image, user.id)
+    return sendJson(response, 200, { user: { ...user, profileImage: image } })
   }
 
   if (!['/api/auth/login', '/api/auth/register', '/api/auth/logout'].includes(pathname)) {

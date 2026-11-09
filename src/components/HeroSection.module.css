@@ -1625,9 +1625,349 @@
   transition: transform .25s ease;
 }
 
+.customerWorkspace {
+  display: flex;
+  min-height: calc(100vh - 76px);
+  background: #fcfaf7;
+}
+
+.customerWorkspaceContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.customerSidebar {
+  position: sticky;
+  top: 16px;
+  z-index: 5;
+  display: flex;
+  flex: 0 0 252px;
+  flex-direction: column;
+  align-self: flex-start;
+  width: 252px;
+  min-height: min(680px, calc(100vh - 32px));
+  margin: 16px 0 16px 16px;
+  border: 1px solid #eee4dc;
+  border-radius: 16px;
+  padding: 20px 12px 14px;
+  background: #fff;
+  box-shadow: 0 10px 30px rgba(83, 23, 24, .08);
+  transition: flex-basis .25s ease, width .25s ease, padding .25s ease;
+}
+
+.customerSidebarCollapsed {
+  flex-basis: 76px;
+  width: 76px;
+  padding-inline: 10px;
+}
+
+.customerSidebarHeading {
+  display: flex;
+  min-height: 42px;
+  align-items: center;
+  gap: 11px;
+  overflow: hidden;
+  padding: 0 8px;
+  color: #531718;
+  font-size: 15px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.customerSidebarMark,
+.customerSidebarAvatar {
+  display: grid;
+  flex: 0 0 36px;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  border-radius: 12px;
+  background: #fff1e5;
+  color: #8d4434;
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.customerSidebarToggle {
+  position: absolute;
+  top: 27px;
+  right: -13px;
+  display: grid;
+  width: 26px;
+  height: 26px;
+  place-items: center;
+  border: 1px solid #eee4dc;
+  border-radius: 50%;
+  background: #fff;
+  color: #531718;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(83, 23, 24, .12);
+}
+
+.customerSidebarToggle:focus-visible,
+.customerSidebarLink:focus-visible {
+  outline: 3px solid #f57f29;
+  outline-offset: 2px;
+}
+
+.customerSidebarNav {
+  display: grid;
+  gap: 6px;
+  margin-top: 32px;
+}
+
+.customerSidebarLink {
+  position: relative;
+  display: flex;
+  min-height: 48px;
+  align-items: center;
+  gap: 13px;
+  overflow: hidden;
+  border: 0;
+  border-radius: 10px;
+  padding: 0 13px;
+  background: transparent;
+  color: #675954;
+  text-align: left;
+  font: 600 13px 'Montserrat', sans-serif;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color .2s ease, background-color .2s ease, transform .2s ease;
+}
+
+.customerSidebarLink:hover {
+  background: #fff8f1;
+  color: #8d4434;
+  transform: translateX(2px);
+}
+
+.customerSidebarLinkActive {
+  background: #531718;
+  color: #fff;
+  box-shadow: 0 5px 12px rgba(83, 23, 24, .16);
+}
+
+.customerSidebarLinkActive:hover {
+  background: #6a2525;
+  color: #fff;
+}
+
+.customerSidebarLink svg {
+  flex: 0 0 20px;
+  width: 20px;
+  height: 20px;
+}
+
+.customerSidebarLabel {
+  overflow: hidden;
+  flex: 1;
+  text-overflow: ellipsis;
+}
+
+.customerSidebarBadge {
+  display: grid;
+  min-width: 21px;
+  height: 21px;
+  place-items: center;
+  border-radius: 11px;
+  padding: 0 5px;
+  background: #f57f29;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.customerSidebarProfile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  overflow: hidden;
+  margin-top: auto;
+  border-top: 1px solid #f0e8e2;
+  padding: 18px 6px 2px;
+}
+
+.customerSidebarAvatar {
+  flex-basis: 34px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #f7e9dc;
+  font-size: 13px;
+}
+
+.customerSidebarAvatar img {
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  object-fit: cover;
+}
+
+.customerSidebarProfileName {
+  overflow: hidden;
+  color: #531718;
+  font-size: 12px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.customerSidebarCollapsed .customerSidebarHeading {
+  padding-inline: 8px;
+}
+
+.customerSidebarCollapsed .customerSidebarTitle,
+.customerSidebarCollapsed .customerSidebarLabel,
+.customerSidebarCollapsed .customerSidebarBadge,
+.customerSidebarCollapsed .customerSidebarProfileName {
+  display: none;
+}
+
+.customerSidebarCollapsed .customerSidebarLink {
+  justify-content: center;
+  padding-inline: 0;
+}
+
+.customerSidebarCollapsed .customerSidebarProfile {
+  justify-content: center;
+  padding-inline: 0;
+}
+
 .customerDashboard {
   padding-bottom: 72px;
   background: #fcfaf7;
+}
+
+.customerProfilePage {
+  min-height: calc(100vh - 76px);
+  padding: clamp(24px, 5vw, 56px);
+  background: #fcfaf7;
+}
+
+.customerProfileCard {
+  max-width: 860px;
+  margin: 0 auto;
+  border: 1px solid #eee4dc;
+  border-radius: 14px;
+  padding: clamp(22px, 4vw, 38px);
+  background: #fff;
+  box-shadow: 0 10px 28px rgba(83, 23, 24, .07);
+}
+
+.customerProfileCard h1 {
+  margin: 0 0 28px;
+  color: #531718;
+  font: 700 clamp(28px, 4vw, 38px) 'Montserrat', sans-serif;
+}
+
+.customerProfileDetails {
+  display: flex;
+  align-items: flex-start;
+  gap: 28px;
+  border-top: 1px solid #f0e8e2;
+  padding-top: 28px;
+}
+
+.customerProfilePhoto {
+  display: grid;
+  flex: 0 0 132px;
+  width: 132px;
+  height: 132px;
+  place-items: center;
+  overflow: hidden;
+  border: 4px solid #fff1e5;
+  border-radius: 50%;
+  background: #f7e9dc;
+  color: #8d4434;
+  font-size: 48px;
+  font-weight: 800;
+}
+
+.customerProfilePhoto img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.customerProfileInfo {
+  min-width: 0;
+  padding-top: 8px;
+}
+
+.customerProfileInfo h2 {
+  margin: 0 0 5px;
+  color: #531718;
+  font-size: 20px;
+}
+
+.customerProfileInfo p {
+  margin: 0 0 8px;
+  color: #665b56;
+  font-size: 13px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.customerProfileActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 18px 0 12px;
+}
+
+.customerProfileUpload,
+.customerProfileRemove {
+  display: inline-flex;
+  min-height: 42px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #531718;
+  border-radius: 6px;
+  padding: 9px 14px;
+  background: #531718;
+  color: #fff;
+  font: 700 12px 'Montserrat', sans-serif;
+  cursor: pointer;
+}
+
+.customerProfileUpload input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  clip-path: inset(50%);
+}
+
+.customerProfileRemove {
+  background: #fff;
+  color: #8d4434;
+}
+
+.customerProfileUpload:focus-within,
+.customerProfileRemove:focus-visible {
+  outline: 3px solid #f57f29;
+  outline-offset: 3px;
+}
+
+.customerProfileUpload:has(input:disabled),
+.customerProfileRemove:disabled {
+  opacity: .65;
+  cursor: wait;
+}
+
+.customerProfileInfo small {
+  color: #867973;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.customerProfileInfo .customerProfileError {
+  color: #a64137;
+  font-weight: 600;
 }
 
 .customerWelcome,
@@ -1864,6 +2204,28 @@
 }
 
 @media (max-width: 700px) {
+  .customerProfilePage {
+    min-height: 0;
+    padding: 22px 12px 38px;
+  }
+
+  .customerProfileDetails {
+    align-items: center;
+    flex-direction: column;
+    gap: 12px;
+    text-align: center;
+  }
+
+  .customerProfilePhoto {
+    flex-basis: 104px;
+    width: 104px;
+    height: 104px;
+  }
+
+  .customerProfileActions {
+    justify-content: center;
+  }
+
   .customerWelcome,
   .customerMenuSection {
     width: min(100% - 24px, 1120px);
@@ -1942,6 +2304,54 @@
 }
 
 @media (max-width: 768px) {
+  .customerWorkspace {
+    display: block;
+    min-height: 0;
+  }
+
+  .customerSidebar,
+  .customerSidebarCollapsed {
+    position: static;
+    display: block;
+    width: auto;
+    min-height: 0;
+    margin: 12px 12px 0;
+    padding: 8px;
+  }
+
+  .customerSidebarHeading,
+  .customerSidebarToggle,
+  .customerSidebarProfile {
+    display: none;
+  }
+
+  .customerSidebarNav {
+    display: flex;
+    gap: 5px;
+    overflow-x: auto;
+    margin: 0;
+    scrollbar-width: thin;
+  }
+
+  .customerSidebarLink,
+  .customerSidebarCollapsed .customerSidebarLink {
+    flex: 0 0 auto;
+    justify-content: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 0 11px;
+  }
+
+  .customerSidebarLabel,
+  .customerSidebarCollapsed .customerSidebarLabel {
+    display: inline;
+  }
+
+  .customerSidebarBadge,
+  .customerSidebarCollapsed .customerSidebarBadge {
+    display: grid;
+  }
+
   .itemModalOverlay {
     align-items: end;
     padding: 0;
@@ -2146,6 +2556,13 @@
 }
 
 @media (max-width: 480px) {
+  .customerSidebarLink,
+  .customerSidebarCollapsed .customerSidebarLink {
+    gap: 6px;
+    padding-inline: 9px;
+    font-size: 11px;
+  }
+
   .navLinks {
     justify-content: space-between;
     gap: 4px;

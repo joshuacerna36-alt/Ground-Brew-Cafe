@@ -194,7 +194,13 @@ const saveUsers = (users) => store.set(USERS_KEY, users)
 const loadOrders = () => store.get(ORDERS_KEY, [])
 const saveOrders = (orders) => store.set(ORDERS_KEY, orders)
 
-const publicUser = (row) => ({ id: row.id, name: row.display_name, email: row.email, role: row.role })
+const publicUser = (row) => ({
+  id: row.id,
+  name: row.display_name,
+  email: row.email,
+  role: row.role,
+  profileImage: row.profile_image || null
+})
 
 const fail = (status, message) => Object.assign(new Error(message), { status })
 
@@ -327,6 +333,29 @@ async function handleAuth(pathname, method, body) {
   if (pathname === '/api/auth/me' && method === 'GET') {
     const row = getSignedInUserRow()
     return { status: 200, body: { user: row ? publicUser(row) : null } }
+  }
+
+  if (pathname === '/api/auth/profile' && method === 'PUT') {
+    const row = requireUser()
+    const image = body.profileImage
+    if (image !== null && (typeof image !== 'string' || image.length > 420 * 1024)) {
+      throw fail(400, 'Choose a profile image smaller than 300 KB.')
+    }
+    if (typeof image === 'string') {
+      const match = /^data:image\/(jpeg|png|webp);base64,([A-Za-z0-9+/]+={0,2})$/.exec(image)
+      if (!match) throw fail(400, 'Choose a JPEG, PNG, or WebP profile image.')
+      const bytes = fromBase64(match[2])
+      if (!bytes.length || bytes.length > 300 * 1024 || toBase64(bytes) !== match[2]) {
+        throw fail(400, 'Choose a profile image smaller than 300 KB.')
+      }
+      const isJpeg = match[1] === 'jpeg' && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[bytes.length - 2] === 0xff && bytes[bytes.length - 1] === 0xd9
+      const isPng = match[1] === 'png' && [137, 80, 78, 71, 13, 10, 26, 10].every((byte, index) => bytes[index] === byte)
+      const isWebp = match[1] === 'webp' && String.fromCharCode(...bytes.slice(0, 4)) === 'RIFF' && String.fromCharCode(...bytes.slice(8, 12)) === 'WEBP'
+      if (!isJpeg && !isPng && !isWebp) throw fail(400, 'The selected file is not a valid image.')
+    }
+    row.profile_image = image
+    saveUsers(loadUsers().map((user) => user.id === row.id ? row : user))
+    return { status: 200, body: { user: publicUser(row) } }
   }
 
   if (!['/api/auth/login', '/api/auth/register', '/api/auth/logout'].includes(pathname)) {
@@ -576,6 +605,7 @@ async function handleBusiness(pathname, method, body) {
       target.email = `deleted+${target.id}@deleted.invalid`
       target.role = 'customer'
       target.account_status = 'deleted'
+      target.profile_image = null
       Object.assign(target, {
         password_algo: 'sha256-iterated',
         password_salt: toBase64(randomBytes(16)),

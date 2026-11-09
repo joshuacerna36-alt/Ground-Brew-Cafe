@@ -163,8 +163,28 @@ const ContactIcon = ({ type }) => {
   )
 }
 
+const CustomerNavIcon = ({ type }) => {
+  const iconPaths = {
+    dashboard: <><rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" /></>,
+    order: <><path d="M5 4h14l1 17H4L5 4Z" /><path d="M9 8a3 3 0 0 0 6 0" /></>,
+    history: <><path d="M3 12a9 9 0 1 0 2.64-6.36L3 8" /><path d="M3 3v5h5m4-1v5l3 2" /></>,
+    profile: <><circle cx="12" cy="8" r="4" /><path d="M5 21a7 7 0 0 1 14 0" /></>,
+    about: <><circle cx="12" cy="12" r="9" /><path d="M12 11v5m0-8h.01" /></>,
+    contact: <><rect x="3" y="5" width="18" height="14" rx="2" /><path d="m3 7 9 6 9-6" /></>
+  }
+
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      {iconPaths[type]}
+    </svg>
+  )
+}
+
 const HeroSection = ({ customerDashboard = false }) => {
   const [activePage, setActivePage] = useState(customerDashboard ? 'Dashboard' : 'Home')
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+  const [profileBusy, setProfileBusy] = useState(false)
+  const [profileError, setProfileError] = useState('')
   const [customerWelcome, setCustomerWelcome] = useState('Welcome!')
   const [activeFeature, setActiveFeature] = useState(categories[0])
   const [cart, setCart] = useState([])
@@ -511,6 +531,61 @@ const HeroSection = ({ customerDashboard = false }) => {
     }
   }
 
+  const saveProfileImage = async (profileImage) => {
+    setProfileBusy(true)
+    setProfileError('')
+    try {
+      const response = await apiFetch('/api/auth/profile', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ profileImage })
+      })
+      const result = await response.json()
+      if (!response.ok) throw new Error(result.error || 'Could not update your profile photo.')
+      setAuthUser(result.user)
+      notifyAuthChange(result.user)
+    } catch (error) {
+      setProfileError(error.message || 'Could not update your profile photo.')
+    } finally {
+      setProfileBusy(false)
+    }
+  }
+
+  const handleProfileImage = async (file) => {
+    if (!file) return
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+      setProfileError('Choose a JPEG, PNG, or WebP image.')
+      return
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      setProfileError('Choose an image smaller than 10 MB.')
+      return
+    }
+    const objectUrl = URL.createObjectURL(file)
+    try {
+      const image = new Image()
+      image.src = objectUrl
+      await new Promise((resolve, reject) => {
+        image.onload = resolve
+        image.onerror = () => reject(new Error('Could not read the selected image.'))
+      })
+      const canvas = document.createElement('canvas')
+      canvas.width = 320
+      canvas.height = 320
+      const context = canvas.getContext('2d')
+      if (!context) throw new Error('Your browser could not process the selected image.')
+      const cropSize = Math.min(image.naturalWidth, image.naturalHeight)
+      const sourceX = (image.naturalWidth - cropSize) / 2
+      const sourceY = (image.naturalHeight - cropSize) / 2
+      context.drawImage(image, sourceX, sourceY, cropSize, cropSize, 0, 0, 320, 320)
+      await saveProfileImage(canvas.toDataURL('image/jpeg', 0.82))
+    } catch (error) {
+      setProfileError(error.message || 'Could not process the selected image.')
+    } finally {
+      URL.revokeObjectURL(objectUrl)
+    }
+  }
+
   const openCart = () => {
     if (authUser) {
       setShowCart(true)
@@ -627,6 +702,68 @@ const HeroSection = ({ customerDashboard = false }) => {
         </div>
       </header>
 
+      <div className={customerDashboard ? styles.customerWorkspace : ''}>
+        {customerDashboard && (
+          <aside className={`${styles.customerSidebar} ${sidebarCollapsed ? styles.customerSidebarCollapsed : ''}`} aria-label="Customer dashboard">
+            <div className={styles.customerSidebarHeading}>
+              <span className={styles.customerSidebarMark} aria-hidden="true">G</span>
+              <span className={styles.customerSidebarTitle}>Your space</span>
+            </div>
+            <button
+              type="button"
+              className={styles.customerSidebarToggle}
+              onClick={() => setSidebarCollapsed((collapsed) => !collapsed)}
+              aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+              aria-expanded={!sidebarCollapsed}
+              title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            >
+              <span aria-hidden="true">{sidebarCollapsed ? '›' : '‹'}</span>
+            </button>
+            <nav className={styles.customerSidebarNav} aria-label="Customer navigation">
+              {[
+                { label: 'Dashboard', page: 'Dashboard', icon: 'dashboard' },
+                { label: 'Order Online', page: 'Order Online', icon: 'order', badge: cart.length || null },
+                { label: 'My Orders', page: 'My Orders', icon: 'history' },
+                { label: 'Profile', page: 'Profile', icon: 'profile' },
+                { label: 'About', page: 'About', icon: 'about' },
+                { label: 'Contact', page: 'Contact', icon: 'contact' }
+              ].map(({ label, page, icon, badge }) => (
+                <button
+                  type="button"
+                  key={page}
+                  className={`${styles.customerSidebarLink} ${activePage === page ? styles.customerSidebarLinkActive : ''}`}
+                  onClick={() => {
+                    if (page === 'My Orders' && !authUser) {
+                      openAuth()
+                      return
+                    }
+                    if (page === 'Profile' && !authUser) {
+                      openAuth()
+                      return
+                    }
+                    setActivePage(page)
+                  }}
+                  aria-current={activePage === page ? 'page' : undefined}
+                  aria-label={sidebarCollapsed ? label : undefined}
+                  title={sidebarCollapsed ? label : undefined}
+                >
+                  <CustomerNavIcon type={icon} />
+                  <span className={styles.customerSidebarLabel}>{label}</span>
+                  {badge && <span className={styles.customerSidebarBadge}>{badge}</span>}
+                </button>
+              ))}
+            </nav>
+            <div className={styles.customerSidebarProfile}>
+              <span className={styles.customerSidebarAvatar} aria-hidden="true">
+                {authUser?.profileImage
+                  ? <img src={authUser.profileImage} alt="" />
+                  : (authUser?.name || 'G').trim().charAt(0).toUpperCase()}
+              </span>
+              <span className={styles.customerSidebarProfileName}>{authUser?.name || 'Guest'}</span>
+            </div>
+          </aside>
+        )}
+        <div className={customerDashboard ? styles.customerWorkspaceContent : ''}>
       {activePage === 'Dashboard' && customerDashboard && (
         <main className={styles.customerDashboard}>
           <section className={styles.customerWelcome}>
@@ -683,6 +820,53 @@ const HeroSection = ({ customerDashboard = false }) => {
                   </button>
                 </article>
               ))}
+            </div>
+          </section>
+        </main>
+      )}
+
+      {activePage === 'Profile' && customerDashboard && authUser && (
+        <main className={styles.customerProfilePage}>
+          <section className={styles.customerProfileCard} aria-labelledby="customer-profile-title">
+            <p className={styles.eyebrow}>Your account</p>
+            <h1 id="customer-profile-title">Profile</h1>
+            <div className={styles.customerProfileDetails}>
+              <div className={styles.customerProfilePhoto}>
+                {authUser.profileImage
+                  ? <img src={authUser.profileImage} alt={`${authUser.name}'s profile`} />
+                  : <span aria-hidden="true">{(authUser.name || 'G').trim().charAt(0).toUpperCase()}</span>}
+              </div>
+              <div className={styles.customerProfileInfo}>
+                <h2>{authUser.name}</h2>
+                <p>{authUser.email}</p>
+                <p>Personalize your account with a profile photo.</p>
+                <div className={styles.customerProfileActions}>
+                  <label className={styles.customerProfileUpload}>
+                    {profileBusy ? 'Saving…' : authUser.profileImage ? 'Change photo' : 'Add a photo'}
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      disabled={profileBusy}
+                      onChange={(event) => {
+                        handleProfileImage(event.target.files?.[0])
+                        event.target.value = ''
+                      }}
+                    />
+                  </label>
+                  {authUser.profileImage && (
+                    <button
+                      type="button"
+                      className={styles.customerProfileRemove}
+                      disabled={profileBusy}
+                      onClick={() => saveProfileImage(null)}
+                    >
+                      Remove photo
+                    </button>
+                  )}
+                </div>
+                {profileError && <p className={styles.customerProfileError} role="alert">{profileError}</p>}
+                <small>JPEG, PNG, or WebP. Images are cropped to a square and resized before upload.</small>
+              </div>
             </div>
           </section>
         </main>
@@ -913,6 +1097,8 @@ const HeroSection = ({ customerDashboard = false }) => {
       {activePage === 'Staff Dashboard' && ['admin', 'staff'].includes(authUser?.role) && (
         <StaffDashboard user={authUser} />
       )}
+        </div>
+      </div>
 
       <footer className={styles.siteFooter}>
         <div className={styles.footerBanner}>

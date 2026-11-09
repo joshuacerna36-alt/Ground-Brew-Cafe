@@ -457,3 +457,125 @@
     text-align: left;
   }
 }
+
+:global([data-theme='dark']) .page {
+  color: #edf2fb;
+}
+
+:global([data-theme='dark']) .heading h1,
+:global([data-theme='dark']) .accounts h2,
+:global([data-theme='dark']) .orderTop h2,
+:global([data-theme='dark']) .amounts .total,
+:global([data-theme='dark']) .accountRow strong,
+:global([data-theme='dark']) .catalogAdminHeading h2 {
+  color: #edf2fb;
+}
+
+:global([data-theme='dark']) .heading p,
+:global([data-theme='dark']) .accounts > p,
+:global([data-theme='dark']) .orderTop h2 span,
+:global([data-theme='dark']) .orderTop p,
+:global([data-theme='dark']) .address,
+:global([data-theme='dark']) .payment,
+:global([data-theme='dark']) .items li,
+:global([data-theme='dark']) .amounts p,
+:global([data-theme='dark']) .accountRow small,
+:global([data-theme='dark']) .roleLabel,
+:global([data-theme='dark']) .catalogAdminHeading p,
+:global([data-theme='dark']) .catalogItem small,
+:global([data-theme='dark']) .catalogField {
+  color: #9aa8bb;
+}
+
+:global([data-theme='dark']) .orderCard,
+:global([data-theme='dark']) .accounts,
+:global([data-theme='dark']) .catalogAdmin,
+:global([data-theme='dark']) .empty {
+  border-color: #202c3e;
+  background: #0c1421;
+  box-shadow: 0 8px 26px rgba(0, 0, 0, .08);
+}
+
+:global([data-theme='dark']) .empty {
+  border-style: dashed;
+  color: #9aa8bb;
+}
+
+:global([data-theme='dark']) .orderNumber,
+:global([data-theme='dark']) .eyebrow {
+  color: #a5b4fc !important;
+}
+
+:global([data-theme='dark']) .status {
+  background: rgba(251, 191, 36, .12);
+  color: #fbbf24;
+}
+
+:global([data-theme='dark']) .status_completed,
+:global([data-theme='dark']) .accountStatusActive,
+:global([data-theme='dark']) .available {
+  color: #34d399;
+}
+
+:global([data-theme='dark']) .status_cancelled,
+:global([data-theme='dark']) .accountStatusInactive,
+:global([data-theme='dark']) .unavailable {
+  color: #fb7185;
+}
+
+:global([data-theme='dark']) .status_completed,
+:global([data-theme='dark']) .status_cancelled {
+  background: rgba(52, 211, 153, .12);
+}
+
+:global([data-theme='dark']) .status_cancelled {
+  background: rgba(251, 113, 133, .12);
+}
+
+:global([data-theme='dark']) .amounts {
+  border-color: #202c3e;
+}
+
+:global([data-theme='dark']) .accountList,
+:global([data-theme='dark']) .accountRow,
+:global([data-theme='dark']) .catalogAdminHeading,
+:global([data-theme='dark']) .catalogItem {
+  border-color: #202c3e;
+}
+
+:global([data-theme='dark']) .roleLabel select,
+:global([data-theme='dark']) .accountButton,
+:global([data-theme='dark']) .catalogField input,
+:global([data-theme='dark']) .mobileNav select {
+  border-color: #334155;
+  background: #111c2c;
+  color: #edf2fb;
+}
+
+:global([data-theme='dark']) .makeAvailable {
+  background: rgba(52, 211, 153, .12);
+  color: #34d399;
+}
+
+:global([data-theme='dark']) .makeUnavailable {
+  background: rgba(251, 113, 133, .12);
+  color: #fb7185;
+}
+
+:global([data-theme='dark']) .error {
+  border-color: rgba(251, 113, 133, .35);
+  background: rgba(251, 113, 133, .08);
+  color: #fb7185;
+}
+
+:global([data-theme='dark']) .refresh,
+:global([data-theme='dark']) .action {
+  background: #6366f1;
+}
+
+:global([data-theme='dark']) .cancel,
+:global([data-theme='dark']) .deleteAccountButton {
+  border-color: #733844;
+  background: #0c1421;
+  color: #fb7185;
+}

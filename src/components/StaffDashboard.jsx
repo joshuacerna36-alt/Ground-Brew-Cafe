@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import styles from './StaffDashboard.module.css'
 import { getCatalogItem, getMenuOverrides, orderCatalog, saveMenuOverride } from '../menuCatalog.js'
 import { apiFetch } from '../api'
@@ -41,7 +41,7 @@ const getNextStatuses = (order) => {
   return nextStatuses[order.status] || []
 }
 
-function StaffDashboard({ user, section = 'Orders', embedded = false }) {
+function StaffDashboard({ user, section = 'Orders', embedded = false, searchTerm = '' }) {
   const [orders, setOrders] = useState([])
   const [users, setUsers] = useState([])
   const [loading, setLoading] = useState(true)
@@ -146,6 +146,20 @@ function StaffDashboard({ user, section = 'Orders', embedded = false }) {
   const showMenu = embedded && ['Menu catalog', 'Availability'].includes(section)
   const showOrders = !embedded || ['Orders', 'Payments'].includes(section)
   const showUsers = !embedded || ['Users', 'Accounts', 'Access roles'].includes(section)
+  const visibleOrders = useMemo(() => {
+    const query = searchTerm.trim().toLowerCase()
+    return orders.filter((order) => !query || [
+      order.orderNumber,
+      order.customerName,
+      order.customerEmail,
+      order.status,
+      order.fulfillment
+    ].some((value) => String(value || '').toLowerCase().includes(query)))
+  }, [orders, searchTerm])
+  const visibleUsers = useMemo(() => {
+    const query = searchTerm.trim().toLowerCase()
+    return users.filter((account) => !query || [account.display_name, account.email, account.role].some((value) => String(value || '').toLowerCase().includes(query)))
+  }, [users, searchTerm])
 
   return (
     <main className={`${styles.page}${embedded ? ` ${styles.embedded}` : ''}`}>
@@ -213,11 +227,11 @@ function StaffDashboard({ user, section = 'Orders', embedded = false }) {
         </section>
       ) : showOrders && loading ? (
         <p className={styles.empty}>Loading dashboard…</p>
-      ) : showOrders && orders.length === 0 ? (
-        <p className={styles.empty}>No orders have been placed yet.</p>
+      ) : showOrders && visibleOrders.length === 0 ? (
+        <p className={styles.empty}>{searchTerm ? 'No orders match your search.' : 'No orders have been placed yet.'}</p>
       ) : showOrders ? (
         <section className={styles.orderList} aria-label="Customer orders">
-          {orders.map((order) => (
+          {visibleOrders.map((order) => (
             <article className={styles.orderCard} key={order.id}>
               <div className={styles.orderTop}>
                 <div>
@@ -294,11 +308,11 @@ function StaffDashboard({ user, section = 'Orders', embedded = false }) {
         <section className={styles.accounts}>
           <h2>Customer and staff access</h2>
           <p>Manage roles and account access. Deactivated accounts cannot sign in; deleted accounts lose contact details while order records are retained.</p>
-          {users.length === 0 ? (
-            <p className={styles.empty}>No customer accounts yet.</p>
+          {visibleUsers.length === 0 ? (
+            <p className={styles.empty}>{searchTerm ? 'No accounts match your search.' : 'No customer accounts yet.'}</p>
           ) : (
             <div className={styles.accountList}>
-              {users.map((account) => (
+              {visibleUsers.map((account) => (
                 <div className={styles.accountRow} key={account.id}>
                   <span><strong>{account.display_name}</strong><small>{account.email}</small></span>
                   {account.role === 'admin' ? (
